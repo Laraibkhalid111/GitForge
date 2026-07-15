@@ -363,6 +363,9 @@
                     <fx:include fx:id="mergePage" source="merge-view.fxml"
                                 visible="false" managed="false"/>
 
+                    <fx:include fx:id="commitGraphPage" source="commit-graph-view.fxml"
+                                visible="false" managed="false"/>
+
                     <VBox fx:id="modulePlaceholderPage" alignment="CENTER" spacing="14"
                           styleClass="content-area module-placeholder" managed="false" visible="false">
                         <padding>

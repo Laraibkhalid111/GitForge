@@ -31,6 +31,7 @@ public class MainController {
         COMMITS,
         BRANCHES,
         MERGE,
+        COMMIT_GRAPH,
         PLACEHOLDER
     }
 
@@ -66,6 +67,10 @@ public class MainController {
     private BorderPane mergePage;
     @FXML
     private MergeController mergePageController;
+    @FXML
+    private BorderPane commitGraphPage;
+    @FXML
+    private CommitGraphController commitGraphPageController;
     @FXML
     private VBox modulePlaceholderPage;
     @FXML
@@ -155,6 +160,9 @@ public class MainController {
         if (mergePageController != null) {
             mergePageController.setStatusReporter(message -> statusMessageLabel.setText(message));
         }
+        if (commitGraphPageController != null) {
+            commitGraphPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
+        }
 
         populatePlaceholderCharts();
         refreshDashboardStats();
@@ -189,8 +197,7 @@ public class MainController {
 
     @FXML
     private void onCommitGraphSelected() {
-        showModule(navCommitGraph, "Commit Graph", "mdi2g-graph-outline",
-                "Visualize commit relationships in a graph layout.");
+        showCommitGraphPage();
     }
 
     @FXML
@@ -231,6 +238,11 @@ public class MainController {
         if (currentPage == Page.MERGE && mergePageController != null) {
             mergePageController.onPageShown();
             statusMessageLabel.setText("Merge workspace refreshed");
+            return;
+        }
+        if (currentPage == Page.COMMIT_GRAPH && commitGraphPageController != null) {
+            commitGraphPageController.onPageShown();
+            statusMessageLabel.setText("Commit graph refreshed");
             return;
         }
         if (currentPage == Page.DASHBOARD) {
@@ -297,6 +309,16 @@ public class MainController {
         statusMessageLabel.setText("Ready");
     }
 
+    private void showCommitGraphPage() {
+        selectNav(navCommitGraph);
+        updateChrome("Commit Graph", "Interactive commit DAG");
+        showPage(Page.COMMIT_GRAPH);
+        if (commitGraphPageController != null) {
+            commitGraphPageController.onPageShown();
+        }
+        statusMessageLabel.setText("Ready");
+    }
+
     private void showModule(VBox navItem, String title, String iconLiteral, String body) {
         selectNav(navItem);
         updateChrome(title, "Module placeholder");
@@ -320,6 +342,7 @@ public class MainController {
         setVisible(commitPage, page == Page.COMMITS);
         setVisible(branchPage, page == Page.BRANCHES);
         setVisible(mergePage, page == Page.MERGE);
+        setVisible(commitGraphPage, page == Page.COMMIT_GRAPH);
         setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
     }
 
