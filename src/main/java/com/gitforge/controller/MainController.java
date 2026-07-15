@@ -1,11 +1,21 @@
 package com.gitforge.controller;
 
+import com.gitforge.util.AppInfo;
+import com.gitforge.util.UiDialogs;
+import com.gitforge.util.UiNotifications;
+import io.github.palexdev.materialfx.controls.MFXProgressSpinner;
+import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
@@ -28,6 +38,14 @@ public class MainController {
     private static final String NAV_SELECTED = "nav-item-selected";
 
     @FXML
+    private BorderPane rootPane;
+    @FXML
+    private StackPane notificationHost;
+    @FXML
+    private StackPane loadingOverlay;
+    @FXML
+    private MFXProgressSpinner loadingSpinner;
+    @FXML
     private Label toolbarTitleLabel;
     @FXML
     private Label toolbarSubtitleLabel;
@@ -35,6 +53,8 @@ public class MainController {
     private Label statusMessageLabel;
     @FXML
     private Label statusPageLabel;
+    @FXML
+    private Label statusVersionLabel;
 
     @FXML
     private ScrollPane dashboardPage;
@@ -98,26 +118,90 @@ public class MainController {
                 navCommitGraph, navAnalytics, navSettings, navAbout
         );
 
-        if (dashboardPageController != null) {
-            dashboardPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
-        }
-        if (repositoryPageController != null) {
-            repositoryPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
-        }
-        if (commitPageController != null) {
-            commitPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
-        }
-        if (branchPageController != null) {
-            branchPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
-        }
-        if (mergePageController != null) {
-            mergePageController.setStatusReporter(message -> statusMessageLabel.setText(message));
-        }
-        if (commitGraphPageController != null) {
-            commitGraphPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
-        }
+        UiNotifications.bind(notificationHost);
+        statusVersionLabel.setText(AppInfo.displayVersion());
+        setLoadingVisible(false);
+
+        wireStatusReporters();
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                installKeyboardShortcuts(newScene);
+            }
+        });
 
         showDashboard();
+    }
+
+    private void wireStatusReporters() {
+        if (dashboardPageController != null) {
+            dashboardPageController.setStatusReporter(this::reportStatus);
+        }
+        if (repositoryPageController != null) {
+            repositoryPageController.setStatusReporter(this::reportStatus);
+        }
+        if (commitPageController != null) {
+            commitPageController.setStatusReporter(this::reportStatus);
+        }
+        if (branchPageController != null) {
+            branchPageController.setStatusReporter(this::reportStatus);
+        }
+        if (mergePageController != null) {
+            mergePageController.setStatusReporter(this::reportStatus);
+        }
+        if (commitGraphPageController != null) {
+            commitGraphPageController.setStatusReporter(this::reportStatus);
+        }
+    }
+
+    private void installKeyboardShortcuts(javafx.scene.Scene scene) {
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.CONTROL_DOWN),
+                this::showDashboard
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.CONTROL_DOWN),
+                this::showRepositoryPage
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT3, KeyCombination.CONTROL_DOWN),
+                this::showCommitPage
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT4, KeyCombination.CONTROL_DOWN),
+                this::showBranchPage
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT5, KeyCombination.CONTROL_DOWN),
+                this::showMergePage
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT6, KeyCombination.CONTROL_DOWN),
+                this::showCommitGraphPage
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.DIGIT7, KeyCombination.CONTROL_DOWN),
+                this::onAnalyticsSelected
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN),
+                this::onRefreshClicked
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.F5),
+                this::onRefreshClicked
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN),
+                this::onNewRepositoryClicked
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.COMMA, KeyCombination.CONTROL_DOWN),
+                this::onSettingsSelected
+        );
+        scene.getAccelerators().put(
+                new KeyCodeCombination(KeyCode.F1),
+                this::onAboutSelected
+        );
     }
 
     @FXML
@@ -161,47 +245,73 @@ public class MainController {
     @FXML
     private void onSettingsSelected() {
         showModule(navSettings, "Settings", "mdi2c-cog-outline",
-                "Configure GitForge preferences and appearance.");
+                "Theme: Dark (system default)\n"
+                        + "Database: local SQLite (~/.gitforge)\n"
+                        + "Version: " + AppInfo.resolveVersion() + "\n\n"
+                        + "Keyboard shortcuts:\n"
+                        + "Ctrl+1–7  Switch pages\n"
+                        + "Ctrl+N    New repository\n"
+                        + "Ctrl+R / F5  Refresh\n"
+                        + "F1        About");
     }
 
     @FXML
     private void onAboutSelected() {
-        showModule(navAbout, "About", "mdi2i-information-outline",
-                "GitForge — a desktop Git visualizer with simulated operations.");
+        showModule(navAbout, "About GitForge", "mdi2i-information-outline",
+                AppInfo.APP_NAME + " " + AppInfo.resolveVersion() + "\n"
+                        + AppInfo.APP_TAGLINE + "\n\n"
+                        + "A desktop Git visualizer with simulated repositories, commits,\n"
+                        + "branches, merges, interactive commit graphs, and analytics.\n\n"
+                        + AppInfo.COPYRIGHT + "\n"
+                        + "Built with JavaFX, MaterialFX, Ikonli, and SQLite.");
+        if (rootPane.getScene() != null) {
+            UiDialogs.info(
+                    rootPane.getScene().getWindow(),
+                    "About " + AppInfo.APP_NAME,
+                    AppInfo.displayVersion(),
+                    AppInfo.APP_TAGLINE + "\n\n" + AppInfo.COPYRIGHT
+                            + "\nJavaFX · MaterialFX · Ikonli · SQLite"
+            );
+        }
     }
 
     @FXML
     private void onRefreshClicked() {
-        if (currentPage == Page.DASHBOARD && dashboardPageController != null) {
-            dashboardPageController.onRefreshClicked();
-            return;
+        setLoadingVisible(true);
+        try {
+            if (currentPage == Page.DASHBOARD && dashboardPageController != null) {
+                dashboardPageController.onRefreshClicked();
+                return;
+            }
+            if (currentPage == Page.REPOSITORY && repositoryPageController != null) {
+                repositoryPageController.onPageShown();
+                reportStatus("Repository list refreshed");
+                return;
+            }
+            if (currentPage == Page.COMMITS && commitPageController != null) {
+                commitPageController.onPageShown();
+                reportStatus("Commit history refreshed");
+                return;
+            }
+            if (currentPage == Page.BRANCHES && branchPageController != null) {
+                branchPageController.onPageShown();
+                reportStatus("Branch list refreshed");
+                return;
+            }
+            if (currentPage == Page.MERGE && mergePageController != null) {
+                mergePageController.onPageShown();
+                reportStatus("Merge workspace refreshed");
+                return;
+            }
+            if (currentPage == Page.COMMIT_GRAPH && commitGraphPageController != null) {
+                commitGraphPageController.onPageShown();
+                reportStatus("Commit graph refreshed");
+                return;
+            }
+            reportStatus("View refreshed");
+        } finally {
+            setLoadingVisible(false);
         }
-        if (currentPage == Page.REPOSITORY && repositoryPageController != null) {
-            repositoryPageController.onPageShown();
-            statusMessageLabel.setText("Repository list refreshed");
-            return;
-        }
-        if (currentPage == Page.COMMITS && commitPageController != null) {
-            commitPageController.onPageShown();
-            statusMessageLabel.setText("Commit history refreshed");
-            return;
-        }
-        if (currentPage == Page.BRANCHES && branchPageController != null) {
-            branchPageController.onPageShown();
-            statusMessageLabel.setText("Branch list refreshed");
-            return;
-        }
-        if (currentPage == Page.MERGE && mergePageController != null) {
-            mergePageController.onPageShown();
-            statusMessageLabel.setText("Merge workspace refreshed");
-            return;
-        }
-        if (currentPage == Page.COMMIT_GRAPH && commitGraphPageController != null) {
-            commitGraphPageController.onPageShown();
-            statusMessageLabel.setText("Commit graph refreshed");
-            return;
-        }
-        statusMessageLabel.setText("View refreshed");
     }
 
     @FXML
@@ -219,7 +329,7 @@ public class MainController {
         if (dashboardPageController != null) {
             dashboardPageController.onPageShown();
         }
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void showRepositoryPage() {
@@ -229,7 +339,7 @@ public class MainController {
         if (repositoryPageController != null) {
             repositoryPageController.onPageShown();
         }
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void showCommitPage() {
@@ -239,7 +349,7 @@ public class MainController {
         if (commitPageController != null) {
             commitPageController.onPageShown();
         }
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void showBranchPage() {
@@ -249,7 +359,7 @@ public class MainController {
         if (branchPageController != null) {
             branchPageController.onPageShown();
         }
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void showMergePage() {
@@ -259,7 +369,7 @@ public class MainController {
         if (mergePageController != null) {
             mergePageController.onPageShown();
         }
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void showCommitGraphPage() {
@@ -269,17 +379,17 @@ public class MainController {
         if (commitGraphPageController != null) {
             commitGraphPageController.onPageShown();
         }
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void showModule(VBox navItem, String title, String iconLiteral, String body) {
         selectNav(navItem);
-        updateChrome(title, "Module placeholder");
+        updateChrome(title, "Application information");
         placeholderTitleLabel.setText(title);
         placeholderBodyLabel.setText(body);
         placeholderIcon.setIconLiteral(iconLiteral);
         showPage(Page.PLACEHOLDER);
-        statusMessageLabel.setText("Ready");
+        reportStatus("Ready");
     }
 
     private void updateChrome(String title, String subtitle) {
@@ -290,6 +400,7 @@ public class MainController {
 
     private void showPage(Page page) {
         currentPage = page;
+        Node visible = resolvePageNode(page);
         setVisible(dashboardPage, page == Page.DASHBOARD);
         setVisible(repositoryPage, page == Page.REPOSITORY);
         setVisible(commitPage, page == Page.COMMITS);
@@ -297,6 +408,29 @@ public class MainController {
         setVisible(mergePage, page == Page.MERGE);
         setVisible(commitGraphPage, page == Page.COMMIT_GRAPH);
         setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
+        if (visible != null) {
+            fadeInPage(visible);
+        }
+    }
+
+    private Node resolvePageNode(Page page) {
+        return switch (page) {
+            case DASHBOARD -> dashboardPage;
+            case REPOSITORY -> repositoryPage;
+            case COMMITS -> commitPage;
+            case BRANCHES -> branchPage;
+            case MERGE -> mergePage;
+            case COMMIT_GRAPH -> commitGraphPage;
+            case PLACEHOLDER -> modulePlaceholderPage;
+        };
+    }
+
+    private static void fadeInPage(Node node) {
+        node.setOpacity(0.35);
+        FadeTransition fade = new FadeTransition(Duration.millis(180), node);
+        fade.setFromValue(0.35);
+        fade.setToValue(1.0);
+        fade.play();
     }
 
     private static void setVisible(Node node, boolean visible) {
@@ -313,6 +447,35 @@ public class MainController {
         }
         if (selected != null && !selected.getStyleClass().contains(NAV_SELECTED)) {
             selected.getStyleClass().add(NAV_SELECTED);
+        }
+    }
+
+    private void reportStatus(String message) {
+        statusMessageLabel.setText(message);
+        if (message != null && looksLikeSuccess(message)) {
+            UiNotifications.success(message);
+        }
+    }
+
+    private static boolean looksLikeSuccess(String message) {
+        String lower = message.toLowerCase();
+        return lower.contains("created")
+                || lower.contains("updated")
+                || lower.contains("deleted")
+                || lower.contains("merged")
+                || lower.contains("exported")
+                || lower.contains("renamed")
+                || lower.contains("switched");
+    }
+
+    private void setLoadingVisible(boolean visible) {
+        if (loadingOverlay == null) {
+            return;
+        }
+        loadingOverlay.setVisible(visible);
+        loadingOverlay.setManaged(visible);
+        if (loadingSpinner != null) {
+            loadingSpinner.setVisible(visible);
         }
     }
 }

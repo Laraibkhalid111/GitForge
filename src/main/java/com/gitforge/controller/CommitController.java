@@ -4,6 +4,7 @@ import com.gitforge.model.CommitSummary;
 import com.gitforge.model.Repository;
 import com.gitforge.service.CommitService;
 import com.gitforge.util.DateDisplays;
+import com.gitforge.util.UiDialogs;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -11,9 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -131,25 +130,26 @@ public class CommitController {
             return;
         }
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Commit");
-        alert.setHeaderText("Delete commit " + selected.getShortHash() + "?");
-        alert.setContentText("This removes the simulated commit from SQLite and the linked history.");
-        alert.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
-
-        alert.showAndWait().filter(response -> response == ButtonType.OK).ifPresent(response -> {
-            try {
-                if (commitService.deleteCommit(selected.getId())) {
-                    refreshTable();
-                    clearDetails();
-                    report("Commit deleted");
-                } else {
-                    report("Commit could not be deleted");
-                }
-            } catch (SQLException ex) {
-                showError("Unable to delete commit", ex.getMessage());
+        Window owner = commitTable.getScene() == null ? null : commitTable.getScene().getWindow();
+        if (!UiDialogs.confirm(
+                owner,
+                "Delete Commit",
+                "Delete commit " + selected.getShortHash() + "?",
+                "This removes the simulated commit from SQLite and the linked history."
+        )) {
+            return;
+        }
+        try {
+            if (commitService.deleteCommit(selected.getId())) {
+                refreshTable();
+                clearDetails();
+                report("Commit deleted");
+            } else {
+                report("Commit could not be deleted");
             }
-        });
+        } catch (SQLException ex) {
+            showError("Unable to delete commit", ex.getMessage());
+        }
     }
 
     @FXML
@@ -287,10 +287,7 @@ public class CommitController {
     }
 
     private void showError(String header, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("GitForge");
-        alert.setHeaderText(header);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Window owner = commitTable.getScene() == null ? null : commitTable.getScene().getWindow();
+        UiDialogs.error(owner, header, message);
     }
 }

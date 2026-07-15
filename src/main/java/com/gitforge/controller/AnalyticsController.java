@@ -365,31 +365,33 @@ public class AnalyticsController {
     }
 
     private void applySnapshot(AnalyticsSnapshot snapshot) {
-        cardRepositoryValue.setText(Integer.toString(snapshot.getTotalRepositories()));
-        cardCommitsValue.setText(Integer.toString(snapshot.getTotalCommits()));
-        cardBranchesValue.setText(Integer.toString(snapshot.getTotalBranches()));
-        cardMergesValue.setText(Integer.toString(snapshot.getTotalMerges()));
-        cardActiveBranchValue.setText(snapshot.getActiveBranch());
-        cardLatestCommitValue.setText(snapshot.getLatestCommit());
-        cardHealthValue.setText(snapshot.getHealthScore() + "%");
+        animateStatValue(cardRepositoryValue, Integer.toString(snapshot.getTotalRepositories()));
+        animateStatValue(cardCommitsValue, Integer.toString(snapshot.getTotalCommits()));
+        animateStatValue(cardBranchesValue, Integer.toString(snapshot.getTotalBranches()));
+        animateStatValue(cardMergesValue, Integer.toString(snapshot.getTotalMerges()));
+        animateStatValue(cardActiveBranchValue, snapshot.getActiveBranch());
+        animateStatValue(cardLatestCommitValue, snapshot.getLatestCommit());
+        animateStatValue(cardHealthValue, snapshot.getHealthScore() + "%");
 
         populateNamedNumberChart(commitsPerRepoChart, "Commits", snapshot.getCommitsPerRepository());
         populatePie(branchDistributionChart, snapshot.getBranchDistribution());
         populateNamedNumberChart(commitTimelineChart, "Commits", snapshot.getCommitActivityTimeline());
         populateNamedNumberChart(repositoryGrowthChart, "Repositories", snapshot.getRepositoryGrowth());
         populateHorizontalBar(topContributorsChart, snapshot.getTopContributors());
+        animateCharts();
 
         statsItems.setAll(snapshot.getRepositoryStats());
         activityItems.setAll(snapshot.getRecentActivity());
     }
 
-    @SuppressWarnings("unchecked")
     private void populateNamedNumberChart(XYChart<String, Number> chart, String seriesName, Map<String, Integer> values) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName(seriesName);
         for (Map.Entry<String, Integer> entry : values.entrySet()) {
             series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
         }
+        chart.setAnimated(true);
+        chart.setLegendVisible(true);
         chart.setData(FXCollections.observableArrayList(series));
     }
 
@@ -401,6 +403,9 @@ public class AnalyticsController {
         if (data.isEmpty()) {
             data.add(new PieChart.Data("No branches", 1));
         }
+        chart.setAnimated(true);
+        chart.setLabelsVisible(true);
+        chart.setLegendVisible(true);
         chart.setData(data);
     }
 
@@ -412,7 +417,28 @@ public class AnalyticsController {
             Map.Entry<String, Integer> entry = entries.get(i);
             series.getData().add(new XYChart.Data<>(entry.getValue(), entry.getKey()));
         }
+        chart.setAnimated(true);
+        chart.setLegendVisible(true);
         chart.setData(FXCollections.observableArrayList(series));
+    }
+
+    private void animateStatValue(Label label, String value) {
+        label.setText(value);
+        ScaleTransition pulse = new ScaleTransition(Duration.millis(160), label);
+        pulse.setFromX(0.92);
+        pulse.setFromY(0.92);
+        pulse.setToX(1.0);
+        pulse.setToY(1.0);
+        pulse.play();
+    }
+
+    private void animateCharts() {
+        for (Node card : chartCards) {
+            FadeTransition fade = new FadeTransition(Duration.millis(260), card);
+            fade.setFromValue(0.4);
+            fade.setToValue(1.0);
+            fade.play();
+        }
     }
 
     private void wireCardHoverAnimations(List<Node> cards) {

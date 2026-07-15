@@ -29,10 +29,10 @@ import java.util.Optional;
  */
 public class CommitGraphService {
 
-    private static final double LANE_WIDTH = 140;
-    private static final double ROW_HEIGHT = 90;
-    private static final double ORIGIN_X = 80;
-    private static final double ORIGIN_Y = 60;
+    private static final double LANE_WIDTH = 168;
+    private static final double ROW_HEIGHT = 112;
+    private static final double ORIGIN_X = 96;
+    private static final double ORIGIN_Y = 72;
 
     private final CommitRepository commitRepository;
     private final BranchRepository branchRepository;

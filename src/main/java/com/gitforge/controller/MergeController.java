@@ -7,28 +7,27 @@ import com.gitforge.model.MergeSummary;
 import com.gitforge.model.Repository;
 import com.gitforge.service.MergeService;
 import com.gitforge.util.DateDisplays;
+import com.gitforge.util.UiDialogs;
 import javafx.animation.FadeTransition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -331,14 +330,13 @@ public class MergeController {
     }
 
     private boolean confirmConflictContinuation(String conflictStatus) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Merge Simulation");
-        alert.setHeaderText(conflictTitle(conflictStatus));
-        alert.setContentText(conflictBody(conflictStatus)
-                + "\n\nContinue with the simulated merge?");
-        alert.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
+        Window owner = repositoryComboBox.getScene() == null ? null : repositoryComboBox.getScene().getWindow();
+        return UiDialogs.confirm(
+                owner,
+                "Merge Simulation",
+                conflictTitle(conflictStatus),
+                conflictBody(conflictStatus) + "\n\nContinue with the simulated merge?"
+        );
     }
 
     private static String conflictTitle(String conflictStatus) {
@@ -411,11 +409,8 @@ public class MergeController {
     }
 
     private void showError(String header, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("GitForge");
-        alert.setHeaderText(header);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Window owner = repositoryComboBox.getScene() == null ? null : repositoryComboBox.getScene().getWindow();
+        UiDialogs.error(owner, header, message);
     }
 
     private record MergeSelection(Repository repository, Branch source, Branch target) {

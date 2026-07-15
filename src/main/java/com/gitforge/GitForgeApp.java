@@ -1,13 +1,20 @@
 package com.gitforge;
 
 import com.gitforge.service.DatabaseService;
+import com.gitforge.util.AppInfo;
+import com.gitforge.util.SplashScreen;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 /**
@@ -29,7 +36,22 @@ public class GitForgeApp extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) {
+        Stage splash = SplashScreen.show(null);
+        PauseTransition delay = new PauseTransition(Duration.millis(1100));
+        delay.setOnFinished(event -> {
+            try {
+                openMainWindow(stage);
+                fadeOutSplash(splash);
+            } catch (IOException ex) {
+                splash.close();
+                throw new IllegalStateException("Unable to launch GitForge UI", ex);
+            }
+        });
+        delay.play();
+    }
+
+    private void openMainWindow(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(
                 Objects.requireNonNull(
                         getClass().getResource("/fxml/main-view.fxml"),
@@ -46,11 +68,32 @@ public class GitForgeApp extends Application {
                 ).toExternalForm()
         );
 
-        stage.setTitle("GitForge");
+        stage.setTitle(AppInfo.APP_NAME + " — " + AppInfo.APP_TAGLINE);
         stage.setMinWidth(MIN_WIDTH);
         stage.setMinHeight(MIN_HEIGHT);
+        loadApplicationIcons(stage);
         stage.setScene(scene);
         stage.show();
+        stage.toFront();
+    }
+
+    private void fadeOutSplash(Stage splash) {
+        if (splash == null) {
+            return;
+        }
+        PauseTransition closeDelay = new PauseTransition(Duration.millis(180));
+        closeDelay.setOnFinished(event -> Platform.runLater(splash::close));
+        closeDelay.play();
+    }
+
+    private void loadApplicationIcons(Stage stage) {
+        try (InputStream stream = getClass().getResourceAsStream("/icons/gitforge-icon.png")) {
+            if (stream != null) {
+                stage.getIcons().add(new Image(stream));
+            }
+        } catch (IOException ignored) {
+            // Optional branding asset — shell still launches without an icon.
+        }
     }
 
     @Override

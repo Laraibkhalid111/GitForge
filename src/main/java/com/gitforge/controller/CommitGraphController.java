@@ -7,15 +7,18 @@ import com.gitforge.util.CommitGraph;
 import com.gitforge.util.DateDisplays;
 import com.gitforge.util.GraphEdge;
 import com.gitforge.util.GraphNode;
+import com.gitforge.util.UiDialogs;
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -34,10 +37,12 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
@@ -57,13 +62,15 @@ import java.util.function.Consumer;
  */
 public class CommitGraphController {
 
-    private static final double NODE_RADIUS = 18;
+    private static final double NODE_RADIUS = 20;
     private static final Color EDGE_COLOR = Color.web("#484f58");
     private static final Color MERGE_EDGE_COLOR = Color.web("#d29922");
     private static final Color HEAD_RING = Color.web("#f0f6fc");
     private static final Color SELECTED_RING = Color.web("#58a6ff");
     private static final Color PATH_EDGE = Color.web("#3fb950");
     private static final Color MONO_NODE = Color.web("#8b949e");
+    private Timeline zoomTimeline;
+    private Timeline selectionPulse;
 
     @FXML
     private ComboBox<Repository> repositoryComboBox;
@@ -353,17 +360,18 @@ public class CommitGraphController {
         double x2 = to.getX();
         double y2 = to.getY() - NODE_RADIUS;
 
-        boolean curved = Math.abs(x1 - x2) > 8 || edge.isMergeEdge();
+        boolean curved = Math.abs(x1 - x2) > 4 || edge.isMergeEdge();
         if (curved) {
             CubicCurve curve = new CubicCurve();
             curve.setStartX(x1);
             curve.setStartY(y1);
             curve.setEndX(x2);
             curve.setEndY(y2);
-            double midY = (y1 + y2) / 2;
-            curve.setControlX1(x1);
+            double midY = (y1 + y2) / 2.0;
+            double sway = (x2 - x1) * 0.08;
+            curve.setControlX1(x1 + sway);
             curve.setControlY1(midY);
-            curve.setControlX2(x2);
+            curve.setControlX2(x2 - sway);
             curve.setControlY2(midY);
             styleEdge(curve, edge);
             return curve;
@@ -376,16 +384,17 @@ public class CommitGraphController {
 
     private void styleEdge(javafx.scene.shape.Shape shape, GraphEdge edge) {
         shape.setStroke(edge.isMergeEdge() ? MERGE_EDGE_COLOR : EDGE_COLOR);
-        shape.setStrokeWidth(edge.isMergeEdge() ? 2.4 : 1.8);
+        shape.setStrokeWidth(edge.isMergeEdge() ? 2.6 : 2.0);
         shape.setFill(null);
+        shape.setStrokeLineCap(StrokeLineCap.ROUND);
+        shape.setStrokeLineJoin(StrokeLineJoin.ROUND);
+        shape.setSmooth(true);
         shape.getStrokeDashArray().clear();
         if (edge.isMergeEdge()) {
-            shape.getStrokeDashArray().addAll(8.0, 6.0);
-        }
-        if (shape instanceof Line line) {
-            line.setStrokeLineCap(StrokeLineCap.ROUND);
+            shape.getStrokeDashArray().addAll(9.0, 7.0);
         }
         shape.setMouseTransparent(true);
+        shape.setOpacity(0.92);
     }
 
     private StackPane createNodeView(GraphNode<GraphCommitInfo> node) {
@@ -399,10 +408,6 @@ public class CommitGraphController {
         Text hashText = new Text(info.getShortHash());
         hashText.setFill(Color.web("#0d1117"));
         hashText.setFont(Font.font("Consolas", FontWeight.BOLD, 9));
-
-        Label branchLabel = new Label(info.getBranchName());
-        branchLabel.setTextFill(Color.web("#c9d1d9"));
-        branchLabel.setStyle("-fx-font-size: 10px;");
 
         VBoxWithPadding content = new VBoxWithPadding(circle, hashText);
         StackPane stack = new StackPane(content);
@@ -483,7 +488,30 @@ public class CommitGraphController {
             highlightedPath = Set.of(hash);
         }
         refreshHighlightStyles();
+        pulseSelectedNode();
         report("Selected " + info.getShortHash());
+    }
+
+    private void pulseSelectedNode() {
+        if (selectionPulse != null) {
+            selectionPulse.stop();
+        }
+        if (selectedHash == null || !nodeViews.containsKey(selectedHash)) {
+            return;
+        }
+        StackPane view = nodeViews.get(selectedHash);
+        selectionPulse = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(view.scaleXProperty(), 1.0),
+                        new KeyValue(view.scaleYProperty(), 1.0)),
+                new KeyFrame(Duration.millis(180),
+                        new KeyValue(view.scaleXProperty(), 1.18),
+                        new KeyValue(view.scaleYProperty(), 1.18)),
+                new KeyFrame(Duration.millis(360),
+                        new KeyValue(view.scaleXProperty(), 1.12),
+                        new KeyValue(view.scaleYProperty(), 1.12))
+        );
+        selectionPulse.play();
     }
 
     private void refreshHighlightStyles() {
@@ -576,9 +604,19 @@ public class CommitGraphController {
     }
 
     private void zoomBy(double delta) {
-        scale = clamp(scale + delta, 0.5, 2.4);
-        applyScale();
-        report(String.format("Zoom %.0f%%", scale * 100));
+        double target = clamp(scale + delta, 0.45, 2.6);
+        if (zoomTimeline != null) {
+            zoomTimeline.stop();
+        }
+        zoomTimeline = new Timeline(
+                new KeyFrame(Duration.millis(160),
+                        new KeyValue(graphCanvas.scaleXProperty(), target),
+                        new KeyValue(graphCanvas.scaleYProperty(), target))
+        );
+        zoomTimeline.setOnFinished(event -> scale = target);
+        zoomTimeline.play();
+        scale = target;
+        report(String.format("Zoom %.0f%%", target * 100));
     }
 
     private void applyScale() {
@@ -614,11 +652,8 @@ public class CommitGraphController {
     }
 
     private void showError(String header, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("GitForge");
-        alert.setHeaderText(header);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Window owner = graphCanvas.getScene() == null ? null : graphCanvas.getScene().getWindow();
+        UiDialogs.error(owner, header, message);
     }
 
     private static double clamp(double value, double min, double max) {

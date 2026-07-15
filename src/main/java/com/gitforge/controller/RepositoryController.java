@@ -3,21 +3,25 @@ package com.gitforge.controller;
 import com.gitforge.model.RepositorySummary;
 import com.gitforge.service.RepositoryService;
 import com.gitforge.util.DateDisplays;
+import com.gitforge.util.UiDialogs;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Window;
@@ -79,6 +83,7 @@ public class RepositoryController {
 
     private final RepositoryService repositoryService = new RepositoryService();
     private final ObservableList<RepositorySummary> tableItems = FXCollections.observableArrayList();
+    private SortedList<RepositorySummary> sortedItems;
 
     private Consumer<String> statusReporter = message -> {
     };
@@ -87,6 +92,11 @@ public class RepositoryController {
     private void initialize() {
         configureTable();
         searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshTable());
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                searchField.clear();
+            }
+        });
         clearDetails();
         refreshTable();
     }
@@ -168,8 +178,19 @@ public class RepositoryController {
         statusColumn.setCellValueFactory(data ->
                 new ReadOnlyStringWrapper(nullToDash(data.getValue().getStatus())));
 
-        repositoryTable.setItems(tableItems);
+        nameColumn.setSortable(true);
+        descriptionColumn.setSortable(true);
+        branchColumn.setSortable(true);
+        commitsColumn.setSortable(true);
+        createdColumn.setSortable(true);
+        statusColumn.setSortable(true);
+
+        sortedItems = new SortedList<>(tableItems);
+        sortedItems.comparatorProperty().bind(repositoryTable.comparatorProperty());
+        repositoryTable.setItems(sortedItems);
         repositoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        repositoryTable.getSortOrder().setAll(nameColumn);
+
         repositoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, newItem) -> {
             boolean hasSelection = newItem != null;
             editButton.setDisable(!hasSelection);
@@ -181,18 +202,35 @@ public class RepositoryController {
             }
         });
 
+        ContextMenu contextMenu = buildContextMenu();
         repositoryTable.setRowFactory(table -> {
             TableRow<RepositorySummary> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
-                if (!row.isEmpty()
-                        && event.getButton() == MouseButton.PRIMARY
-                        && event.getClickCount() == 2) {
+                if (row.isEmpty()) {
+                    return;
+                }
+                if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                     repositoryTable.getSelectionModel().select(row.getItem());
-                    showDetails(row.getItem());
+                    onEditClicked();
                 }
             });
+            row.contextMenuProperty().bind(
+                    javafx.beans.binding.Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(contextMenu)
+            );
             return row;
         });
+    }
+
+    private ContextMenu buildContextMenu() {
+        MenuItem edit = new MenuItem("Edit");
+        edit.setOnAction(event -> onEditClicked());
+        MenuItem delete = new MenuItem("Delete");
+        delete.setOnAction(event -> onDeleteClicked());
+        MenuItem refresh = new MenuItem("Refresh");
+        refresh.setOnAction(event -> onRefreshClicked());
+        return new ContextMenu(edit, delete, new SeparatorMenuItem(), refresh);
     }
 
     private void refreshTable() {
@@ -202,6 +240,11 @@ public class RepositoryController {
             boolean empty = tableItems.isEmpty();
             emptyLabel.setVisible(empty);
             emptyLabel.setManaged(empty);
+            if (empty) {
+                emptyLabel.setText(query == null || query.isBlank()
+                        ? "No repositories yet. Click New Repository to get started."
+                        : "No repositories match \"" + query.trim() + "\".");
+            }
         } catch (SQLException ex) {
             showError("Unable to load repositories", ex.getMessage());
         }
@@ -247,16 +290,13 @@ public class RepositoryController {
     }
 
     private boolean confirmDelete(RepositorySummary summary) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Repository");
-        alert.setHeaderText("Delete \"" + summary.getName() + "\"?");
-        alert.setContentText(
-                "This removes the simulated repository and related records from SQLite. This cannot be undone.");
-        if (repositoryTable.getScene() != null) {
-            alert.initOwner(repositoryTable.getScene().getWindow());
-        }
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
+        Window owner = repositoryTable.getScene() == null ? null : repositoryTable.getScene().getWindow();
+        return UiDialogs.confirm(
+                owner,
+                "Delete Repository",
+                "Delete \"" + summary.getName() + "\"?",
+                "This removes the simulated repository and related records from SQLite. This cannot be undone."
+        );
     }
 
     private void selectById(Long id) {
@@ -278,14 +318,8 @@ public class RepositoryController {
     }
 
     private void showError(String title, String detail) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(title);
-        alert.setContentText(detail == null ? "An unexpected error occurred." : detail);
-        if (repositoryTable.getScene() != null) {
-            alert.initOwner(repositoryTable.getScene().getWindow());
-        }
-        alert.showAndWait();
+        Window owner = repositoryTable.getScene() == null ? null : repositoryTable.getScene().getWindow();
+        UiDialogs.error(owner, title, detail);
         report(title);
     }
 

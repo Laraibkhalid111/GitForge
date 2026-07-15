@@ -68,7 +68,7 @@
 
                 <Button text="Export PNG" styleClass="toolbar-button" onAction="#onExportClicked">
                     <graphic>
-                        <FontIcon iconLiteral="mdi2i-information-outline" iconSize="16" styleClass="toolbar-button-icon"/>
+                        <FontIcon iconLiteral="mdi2f-file-export-outline" iconSize="16" styleClass="toolbar-button-icon"/>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Export the graph canvas as PNG"/>

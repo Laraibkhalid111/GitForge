@@ -4,6 +4,7 @@ import com.gitforge.model.BranchSummary;
 import com.gitforge.model.Repository;
 import com.gitforge.service.BranchService;
 import com.gitforge.util.DateDisplays;
+import com.gitforge.util.UiDialogs;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -12,9 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -184,25 +183,26 @@ public class BranchController {
             return;
         }
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Branch");
-        alert.setHeaderText("Delete branch \"" + selected.getName() + "\"?");
-        alert.setContentText("Only branch metadata is removed. Commit history is preserved.");
-        alert.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
-
-        alert.showAndWait().filter(response -> response == ButtonType.OK).ifPresent(response -> {
-            try {
-                if (branchService.deleteBranch(selected.getId())) {
-                    refreshTable();
-                    clearDetails();
-                    report("Branch deleted");
-                } else {
-                    report("Branch could not be deleted");
-                }
-            } catch (IllegalArgumentException | SQLException ex) {
-                showError("Unable to delete branch", ex.getMessage());
+        Window owner = branchTable.getScene() == null ? null : branchTable.getScene().getWindow();
+        if (!UiDialogs.confirm(
+                owner,
+                "Delete Branch",
+                "Delete branch \"" + selected.getName() + "\"?",
+                "Only branch metadata is removed. Commit history is preserved."
+        )) {
+            return;
+        }
+        try {
+            if (branchService.deleteBranch(selected.getId())) {
+                refreshTable();
+                clearDetails();
+                report("Branch deleted");
+            } else {
+                report("Branch could not be deleted");
             }
-        });
+        } catch (IllegalArgumentException | SQLException ex) {
+            showError("Unable to delete branch", ex.getMessage());
+        }
     }
 
     @FXML
@@ -393,10 +393,7 @@ public class BranchController {
     }
 
     private void showError(String header, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("GitForge");
-        alert.setHeaderText(header);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Window owner = branchTable.getScene() == null ? null : branchTable.getScene().getWindow();
+        UiDialogs.error(owner, header, message);
     }
 }
