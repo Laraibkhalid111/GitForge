@@ -258,7 +258,3 @@ Consider giving the repository a ⭐ on GitHub.
 <div align="center">
 
 **GitForge — Understanding Git Through Visualization**
-
-Made with ❤️ using Java & JavaFX
-
-</div>
