@@ -201,17 +201,6 @@ cd GitForge
 
 ---
 
-## 📸 Screenshots
-
-> Add screenshots here before submission.
-
-- Dashboard
-- Repository Management
-- Commit Management
-- Branch Management
-- Merge Simulation
-- Commit Graph
-- Analytics Dashboard
 
 ---
 
