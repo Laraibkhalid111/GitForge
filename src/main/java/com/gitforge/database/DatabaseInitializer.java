@@ -4,6 +4,7 @@ import com.gitforge.util.InstantFormats;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -29,6 +30,7 @@ public final class DatabaseInitializer {
                 createStashTable(statement);
                 createSettingsTable(statement);
                 createIndexes(statement);
+                migrateCommitsTable(connection);
             }
             seedDefaultSettings(connection);
             connection.commit();
@@ -78,11 +80,38 @@ public final class DatabaseInitializer {
                     author TEXT,
                     committed_at TEXT NOT NULL,
                     parent_hash TEXT,
+                    commit_type TEXT,
+                    files_changed INTEGER NOT NULL DEFAULT 0,
                     FOREIGN KEY (repository_id) REFERENCES repositories(id) ON DELETE CASCADE,
                     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE SET NULL,
                     UNIQUE (repository_id, hash)
                 )
                 """);
+    }
+
+    private static void migrateCommitsTable(Connection connection) throws SQLException {
+        if (!columnExists(connection, "commits", "commit_type")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE commits ADD COLUMN commit_type TEXT");
+            }
+        }
+        if (!columnExists(connection, "commits", "files_changed")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE commits ADD COLUMN files_changed INTEGER NOT NULL DEFAULT 0");
+            }
+        }
+    }
+
+    private static boolean columnExists(Connection connection, String table, String column) throws SQLException {
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(" + table + ")")) {
+            while (resultSet.next()) {
+                if (column.equalsIgnoreCase(resultSet.getString("name"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void createMergesTable(Statement statement) throws SQLException {

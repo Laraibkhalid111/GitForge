@@ -16,6 +16,8 @@ public class Commit {
     private String author;
     private Instant committedAt;
     private String parentHash;
+    private String commitType;
+    private int filesChanged;
 
     public Commit() {
     }
@@ -107,6 +109,22 @@ public class Commit {
         this.parentHash = parentHash;
     }
 
+    public String getCommitType() {
+        return commitType;
+    }
+
+    public void setCommitType(String commitType) {
+        this.commitType = commitType;
+    }
+
+    public int getFilesChanged() {
+        return filesChanged;
+    }
+
+    public void setFilesChanged(int filesChanged) {
+        this.filesChanged = filesChanged;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -141,6 +159,8 @@ public class Commit {
                 + ", author='" + author + '\''
                 + ", committedAt=" + committedAt
                 + ", parentHash='" + parentHash + '\''
+                + ", commitType='" + commitType + '\''
+                + ", filesChanged=" + filesChanged
                 + '}';
     }
 }

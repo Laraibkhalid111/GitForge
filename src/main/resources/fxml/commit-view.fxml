@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/24"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gitforge.controller.CommitController"
+            styleClass="content-area repository-page">
+
+    <top>
+        <VBox spacing="14" styleClass="repo-toolbar-block">
+            <padding>
+                <Insets top="20" right="24" bottom="8" left="24"/>
+            </padding>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <ComboBox fx:id="repositoryComboBox" promptText="All repositories"
+                          styleClass="dialog-field" prefWidth="200" prefHeight="36"/>
+
+                <TextField fx:id="searchField" promptText="Search commits..."
+                           styleClass="repo-search-field" HBox.hgrow="ALWAYS" prefHeight="36"/>
+
+                <Button fx:id="newButton" text="New Commit"
+                        styleClass="toolbar-button toolbar-button-primary" onAction="#onNewClicked">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi2p-plus" iconSize="16" styleClass="toolbar-button-icon"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Create a simulated commit"/>
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="deleteButton" text="Delete"
+                        styleClass="toolbar-button toolbar-button-danger" onAction="#onDeleteClicked" disable="true">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi2d-delete-outline" iconSize="16" styleClass="toolbar-button-icon"/>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="refreshButton" styleClass="toolbar-button" onAction="#onRefreshClicked">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi2r-refresh" iconSize="16" styleClass="toolbar-button-icon"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Refresh commit history"/>
+                    </tooltip>
+                </Button>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <HBox spacing="16" styleClass="repo-main-split">
+            <padding>
+                <Insets top="8" right="24" bottom="24" left="24"/>
+            </padding>
+
+            <VBox spacing="10" styleClass="repo-table-card" HBox.hgrow="ALWAYS" minWidth="420">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <Label text="Commit History" styleClass="section-title"/>
+                <TableView fx:id="commitTable" styleClass="repo-table" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="hashColumn" text="Hash" prefWidth="90"/>
+                        <TableColumn fx:id="messageColumn" text="Message" prefWidth="180"/>
+                        <TableColumn fx:id="authorColumn" text="Author" prefWidth="110"/>
+                        <TableColumn fx:id="typeColumn" text="Type" prefWidth="90"/>
+                        <TableColumn fx:id="branchColumn" text="Branch" prefWidth="90"/>
+                        <TableColumn fx:id="repositoryColumn" text="Repository" prefWidth="110"/>
+                        <TableColumn fx:id="dateColumn" text="Date" prefWidth="130"/>
+                        <TableColumn fx:id="filesColumn" text="Files" prefWidth="60"/>
+                    </columns>
+                </TableView>
+                <Label fx:id="emptyLabel" text="No commits yet. Create a repository, then add a commit."
+                       styleClass="placeholder-body" visible="false" managed="false"/>
+            </VBox>
+
+            <VBox spacing="10" styleClass="repo-details-card" prefWidth="320" minWidth="280">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="mdi2s-source-commit" iconSize="20" styleClass="repo-details-icon"/>
+                    <Label text="Commit Details" styleClass="section-title"/>
+                </HBox>
+
+                <Label fx:id="detailsPlaceholderLabel" text="Select a commit to view details."
+                       styleClass="placeholder-body" wrapText="true"/>
+
+                <GridPane fx:id="detailsGrid" hgap="10" vgap="8" visible="false" managed="false">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="90" prefWidth="100"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="140"/>
+                    </columnConstraints>
+
+                    <Label text="Hash" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <Label fx:id="detailHashLabel" wrapText="true" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Message" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <Label fx:id="detailMessageLabel" wrapText="true" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Author" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <Label fx:id="detailAuthorLabel" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                    <Label text="Type" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <Label fx:id="detailTypeLabel" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                    <Label text="Branch" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <Label fx:id="detailBranchLabel" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                    <Label text="Repository" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                    <Label fx:id="detailRepositoryLabel" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                    <Label text="Date" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                    <Label fx:id="detailDateLabel" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+
+                    <Label text="Parent" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+                    <Label fx:id="detailParentLabel" wrapText="true" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+
+                    <Label text="Files Changed" styleClass="dialog-field-label" GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+                    <Label fx:id="detailFilesLabel" styleClass="repo-detail-value"
+                           GridPane.columnIndex="1" GridPane.rowIndex="8"/>
+                </GridPane>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

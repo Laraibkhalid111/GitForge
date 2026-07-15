@@ -28,6 +28,7 @@ public class MainController {
     private enum Page {
         DASHBOARD,
         REPOSITORY,
+        COMMITS,
         PLACEHOLDER
     }
 
@@ -51,6 +52,10 @@ public class MainController {
     private BorderPane repositoryPage;
     @FXML
     private RepositoryController repositoryPageController;
+    @FXML
+    private BorderPane commitPage;
+    @FXML
+    private CommitController commitPageController;
     @FXML
     private VBox modulePlaceholderPage;
     @FXML
@@ -131,6 +136,9 @@ public class MainController {
         if (repositoryPageController != null) {
             repositoryPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
         }
+        if (commitPageController != null) {
+            commitPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
+        }
 
         populatePlaceholderCharts();
         refreshDashboardStats();
@@ -150,8 +158,7 @@ public class MainController {
 
     @FXML
     private void onCommitsSelected() {
-        showModule(navCommits, "Commits", "mdi2s-source-commit",
-                "Browse and inspect simulated commit history.");
+        showCommitPage();
     }
 
     @FXML
@@ -197,6 +204,11 @@ public class MainController {
             statusMessageLabel.setText("Repository list refreshed");
             return;
         }
+        if (currentPage == Page.COMMITS && commitPageController != null) {
+            commitPageController.onPageShown();
+            statusMessageLabel.setText("Commit history refreshed");
+            return;
+        }
         if (currentPage == Page.DASHBOARD) {
             refreshDashboardStats();
             statusMessageLabel.setText("Dashboard refreshed");
@@ -231,6 +243,16 @@ public class MainController {
         statusMessageLabel.setText("Ready");
     }
 
+    private void showCommitPage() {
+        selectNav(navCommits);
+        updateChrome("Commits", "Browse simulated commit history");
+        showPage(Page.COMMITS);
+        if (commitPageController != null) {
+            commitPageController.onPageShown();
+        }
+        statusMessageLabel.setText("Ready");
+    }
+
     private void showModule(VBox navItem, String title, String iconLiteral, String body) {
         selectNav(navItem);
         updateChrome(title, "Module placeholder");
@@ -251,6 +273,7 @@ public class MainController {
         currentPage = page;
         setVisible(dashboardPage, page == Page.DASHBOARD);
         setVisible(repositoryPage, page == Page.REPOSITORY);
+        setVisible(commitPage, page == Page.COMMITS);
         setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
     }
 
