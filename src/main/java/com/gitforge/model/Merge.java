@@ -8,6 +8,18 @@ import java.util.Objects;
  */
 public class Merge {
 
+    public static final String STATUS_COMPLETED = "Completed";
+    public static final String STATUS_SIMULATED = "Simulated";
+    public static final String STATUS_CANCELLED = "Cancelled";
+
+    public static final String STRATEGY_FAST_FORWARD = "Fast Forward";
+    public static final String STRATEGY_THREE_WAY = "Three Way Merge";
+    public static final String STRATEGY_SIMULATION_ONLY = "Simulation Only";
+
+    public static final String CONFLICT_NONE = "No Conflict";
+    public static final String CONFLICT_MINOR = "Minor Conflict";
+    public static final String CONFLICT_MAJOR = "Major Conflict";
+
     private Long id;
     private Long repositoryId;
     private Long sourceBranchId;
@@ -15,6 +27,9 @@ public class Merge {
     private String status;
     private String message;
     private Instant mergedAt;
+    private String strategy;
+    private String mergeCommitHash;
+    private String conflictStatus;
 
     public Merge() {
     }
@@ -96,6 +111,30 @@ public class Merge {
         this.mergedAt = mergedAt;
     }
 
+    public String getStrategy() {
+        return strategy;
+    }
+
+    public void setStrategy(String strategy) {
+        this.strategy = strategy;
+    }
+
+    public String getMergeCommitHash() {
+        return mergeCommitHash;
+    }
+
+    public void setMergeCommitHash(String mergeCommitHash) {
+        this.mergeCommitHash = mergeCommitHash;
+    }
+
+    public String getConflictStatus() {
+        return conflictStatus;
+    }
+
+    public void setConflictStatus(String conflictStatus) {
+        this.conflictStatus = conflictStatus;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -130,7 +169,9 @@ public class Merge {
                 + ", sourceBranchId=" + sourceBranchId
                 + ", targetBranchId=" + targetBranchId
                 + ", status='" + status + '\''
-                + ", message='" + message + '\''
+                + ", strategy='" + strategy + '\''
+                + ", mergeCommitHash='" + mergeCommitHash + '\''
+                + ", conflictStatus='" + conflictStatus + '\''
                 + ", mergedAt=" + mergedAt
                 + '}';
     }

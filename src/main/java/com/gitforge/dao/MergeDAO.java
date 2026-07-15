@@ -16,39 +16,43 @@ import java.util.Optional;
  */
 public class MergeDAO extends AbstractDAO {
 
-    private static final String INSERT = """
-            INSERT INTO merges (repository_id, source_branch_id, target_branch_id, status, message, merged_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """;
+    private static final String COLUMNS =
+            "id, repository_id, source_branch_id, target_branch_id, status, message, merged_at, "
+                    + "strategy, merge_commit, conflict_status";
 
-    private static final String SELECT_BY_ID = """
-            SELECT id, repository_id, source_branch_id, target_branch_id, status, message, merged_at
-            FROM merges
-            WHERE id = ?
-            """;
+    private static final String INSERT =
+            "INSERT INTO merges (repository_id, source_branch_id, target_branch_id, status, message, "
+                    + "merged_at, strategy, merge_commit, conflict_status) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE = """
-            UPDATE merges
-            SET repository_id = ?, source_branch_id = ?, target_branch_id = ?,
-                status = ?, message = ?, merged_at = ?
-            WHERE id = ?
-            """;
+    private static final String SELECT_BY_ID =
+            "SELECT " + COLUMNS + " FROM merges WHERE id = ?";
+
+    private static final String UPDATE =
+            "UPDATE merges SET repository_id = ?, source_branch_id = ?, target_branch_id = ?, "
+                    + "status = ?, message = ?, merged_at = ?, strategy = ?, merge_commit = ?, "
+                    + "conflict_status = ? WHERE id = ?";
 
     private static final String DELETE = "DELETE FROM merges WHERE id = ?";
 
-    private static final String SELECT_ALL = """
-            SELECT id, repository_id, source_branch_id, target_branch_id, status, message, merged_at
-            FROM merges
-            ORDER BY merged_at DESC
-            """;
+    private static final String SELECT_ALL =
+            "SELECT " + COLUMNS + " FROM merges ORDER BY merged_at DESC";
 
-    private static final String SEARCH = """
-            SELECT id, repository_id, source_branch_id, target_branch_id, status, message, merged_at
-            FROM merges
-            WHERE status LIKE ? ESCAPE '\\'
-               OR IFNULL(message, '') LIKE ? ESCAPE '\\'
-            ORDER BY merged_at DESC
-            """;
+    private static final String SELECT_BY_REPOSITORY =
+            "SELECT " + COLUMNS + " FROM merges WHERE repository_id = ? ORDER BY merged_at DESC";
+
+    private static final String SEARCH =
+            "SELECT " + COLUMNS + " FROM merges WHERE "
+                    + "status LIKE ? ESCAPE '\\' "
+                    + "OR IFNULL(message, '') LIKE ? ESCAPE '\\' "
+                    + "OR IFNULL(strategy, '') LIKE ? ESCAPE '\\' "
+                    + "OR IFNULL(conflict_status, '') LIKE ? ESCAPE '\\' "
+                    + "ORDER BY merged_at DESC";
+
+    private static final String COUNT_ALL = "SELECT COUNT(*) FROM merges";
+
+    private static final String COUNT_BY_REPOSITORY =
+            "SELECT COUNT(*) FROM merges WHERE repository_id = ?";
 
     public long create(Merge merge) throws SQLException {
         if (merge.getMergedAt() == null) {
@@ -75,7 +79,7 @@ public class MergeDAO extends AbstractDAO {
         }
         try (PreparedStatement statement = connection().prepareStatement(UPDATE)) {
             bindWritable(statement, merge);
-            statement.setLong(7, merge.getId());
+            statement.setLong(10, merge.getId());
             return executeUpdate(statement);
         }
     }
@@ -93,12 +97,37 @@ public class MergeDAO extends AbstractDAO {
         }
     }
 
+    public List<Merge> findByRepositoryId(long repositoryId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(SELECT_BY_REPOSITORY)) {
+            statement.setLong(1, repositoryId);
+            return queryList(statement, this::mapRow);
+        }
+    }
+
     public List<Merge> search(String query) throws SQLException {
         String pattern = likePattern(query);
         try (PreparedStatement statement = connection().prepareStatement(SEARCH)) {
             statement.setString(1, pattern);
             statement.setString(2, pattern);
+            statement.setString(3, pattern);
+            statement.setString(4, pattern);
             return queryList(statement, this::mapRow);
+        }
+    }
+
+    public int countAll() throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_ALL);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getInt(1) : 0;
+        }
+    }
+
+    public int countByRepositoryId(long repositoryId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_REPOSITORY)) {
+            statement.setLong(1, repositoryId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt(1) : 0;
+            }
         }
     }
 
@@ -109,6 +138,9 @@ public class MergeDAO extends AbstractDAO {
         statement.setString(4, merge.getStatus());
         statement.setString(5, merge.getMessage());
         statement.setString(6, InstantFormats.format(merge.getMergedAt()));
+        statement.setString(7, merge.getStrategy());
+        statement.setString(8, merge.getMergeCommitHash());
+        statement.setString(9, merge.getConflictStatus());
     }
 
     private static void setNullableLong(PreparedStatement statement, int index, Long value) throws SQLException {
@@ -120,7 +152,7 @@ public class MergeDAO extends AbstractDAO {
     }
 
     private Merge mapRow(ResultSet resultSet) throws SQLException {
-        return new Merge(
+        Merge merge = new Merge(
                 resultSet.getLong("id"),
                 resultSet.getLong("repository_id"),
                 readNullableLong(resultSet, "source_branch_id"),
@@ -129,6 +161,10 @@ public class MergeDAO extends AbstractDAO {
                 resultSet.getString("message"),
                 InstantFormats.parse(resultSet.getString("merged_at"))
         );
+        merge.setStrategy(resultSet.getString("strategy"));
+        merge.setMergeCommitHash(resultSet.getString("merge_commit"));
+        merge.setConflictStatus(resultSet.getString("conflict_status"));
+        return merge;
     }
 
     private static Long readNullableLong(ResultSet resultSet, String column) throws SQLException {

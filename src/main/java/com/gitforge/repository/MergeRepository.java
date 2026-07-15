@@ -42,7 +42,19 @@ public class MergeRepository {
         return dao.findAll();
     }
 
+    public List<Merge> findByRepositoryId(long repositoryId) throws SQLException {
+        return dao.findByRepositoryId(repositoryId);
+    }
+
     public List<Merge> search(String query) throws SQLException {
         return dao.search(query);
+    }
+
+    public int countAll() throws SQLException {
+        return dao.countAll();
+    }
+
+    public int countByRepositoryId(long repositoryId) throws SQLException {
+        return dao.countByRepositoryId(repositoryId);
     }
 }

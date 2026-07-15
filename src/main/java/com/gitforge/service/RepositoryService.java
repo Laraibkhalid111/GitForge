@@ -6,6 +6,7 @@ import com.gitforge.model.Repository;
 import com.gitforge.model.RepositorySummary;
 import com.gitforge.repository.BranchRepository;
 import com.gitforge.repository.CommitRepository;
+import com.gitforge.repository.MergeRepository;
 import com.gitforge.repository.RepositoryRepository;
 
 import java.nio.file.Path;
@@ -26,17 +27,26 @@ public class RepositoryService {
     private final RepositoryRepository repositoryRepository;
     private final BranchRepository branchRepository;
     private final CommitRepository commitRepository;
+    private final MergeRepository mergeRepository;
 
     public RepositoryService() {
-        this(new RepositoryRepository(), new BranchRepository(), new CommitRepository());
+        this(new RepositoryRepository(), new BranchRepository(), new CommitRepository(), new MergeRepository());
     }
 
     public RepositoryService(RepositoryRepository repositoryRepository,
                              BranchRepository branchRepository,
                              CommitRepository commitRepository) {
+        this(repositoryRepository, branchRepository, commitRepository, new MergeRepository());
+    }
+
+    public RepositoryService(RepositoryRepository repositoryRepository,
+                             BranchRepository branchRepository,
+                             CommitRepository commitRepository,
+                             MergeRepository mergeRepository) {
         this.repositoryRepository = repositoryRepository;
         this.branchRepository = branchRepository;
         this.commitRepository = commitRepository;
+        this.mergeRepository = mergeRepository;
     }
 
     public List<RepositorySummary> listSummaries() throws SQLException {
@@ -114,6 +124,10 @@ public class RepositoryService {
 
     public int countAllCommits() throws SQLException {
         return commitRepository.countAll();
+    }
+
+    public int countAllMerges() throws SQLException {
+        return mergeRepository.countAll();
     }
 
     private List<RepositorySummary> toSummaries(List<Repository> repositories) throws SQLException {

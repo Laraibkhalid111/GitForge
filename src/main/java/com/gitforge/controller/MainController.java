@@ -30,6 +30,7 @@ public class MainController {
         REPOSITORY,
         COMMITS,
         BRANCHES,
+        MERGE,
         PLACEHOLDER
     }
 
@@ -61,6 +62,10 @@ public class MainController {
     private BorderPane branchPage;
     @FXML
     private BranchController branchPageController;
+    @FXML
+    private BorderPane mergePage;
+    @FXML
+    private MergeController mergePageController;
     @FXML
     private VBox modulePlaceholderPage;
     @FXML
@@ -147,6 +152,9 @@ public class MainController {
         if (branchPageController != null) {
             branchPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
         }
+        if (mergePageController != null) {
+            mergePageController.setStatusReporter(message -> statusMessageLabel.setText(message));
+        }
 
         populatePlaceholderCharts();
         refreshDashboardStats();
@@ -176,8 +184,7 @@ public class MainController {
 
     @FXML
     private void onMergeSelected() {
-        showModule(navMerge, "Merge", "mdi2s-source-merge",
-                "Simulate merge operations between branches.");
+        showMergePage();
     }
 
     @FXML
@@ -219,6 +226,11 @@ public class MainController {
         if (currentPage == Page.BRANCHES && branchPageController != null) {
             branchPageController.onPageShown();
             statusMessageLabel.setText("Branch list refreshed");
+            return;
+        }
+        if (currentPage == Page.MERGE && mergePageController != null) {
+            mergePageController.onPageShown();
+            statusMessageLabel.setText("Merge workspace refreshed");
             return;
         }
         if (currentPage == Page.DASHBOARD) {
@@ -275,6 +287,16 @@ public class MainController {
         statusMessageLabel.setText("Ready");
     }
 
+    private void showMergePage() {
+        selectNav(navMerge);
+        updateChrome("Merge", "Simulate branch merges");
+        showPage(Page.MERGE);
+        if (mergePageController != null) {
+            mergePageController.onPageShown();
+        }
+        statusMessageLabel.setText("Ready");
+    }
+
     private void showModule(VBox navItem, String title, String iconLiteral, String body) {
         selectNav(navItem);
         updateChrome(title, "Module placeholder");
@@ -297,6 +319,7 @@ public class MainController {
         setVisible(repositoryPage, page == Page.REPOSITORY);
         setVisible(commitPage, page == Page.COMMITS);
         setVisible(branchPage, page == Page.BRANCHES);
+        setVisible(mergePage, page == Page.MERGE);
         setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
     }
 
@@ -400,10 +423,11 @@ public class MainController {
         try {
             int repositoryCount = repositoryService.countRepositories();
             int commitCount = repositoryService.countAllCommits();
+            int mergeCount = repositoryService.countAllMerges();
             cardRepositoryValue.setText(Integer.toString(repositoryCount));
             cardCommitsValue.setText(Integer.toString(commitCount));
             cardBranchValue.setText(repositoryCount > 0 ? "main" : "—");
-            cardMergeValue.setText("0");
+            cardMergeValue.setText(Integer.toString(mergeCount));
         } catch (SQLException ex) {
             cardRepositoryValue.setText("—");
             cardCommitsValue.setText("0");

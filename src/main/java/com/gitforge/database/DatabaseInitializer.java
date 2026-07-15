@@ -32,6 +32,7 @@ public final class DatabaseInitializer {
                 createIndexes(statement);
                 migrateCommitsTable(connection);
                 migrateBranchesTable(connection);
+                migrateMergesTable(connection);
             }
             seedDefaultSettings(connection);
             connection.commit();
@@ -153,11 +154,32 @@ public final class DatabaseInitializer {
                     status TEXT NOT NULL,
                     message TEXT,
                     merged_at TEXT NOT NULL,
+                    strategy TEXT,
+                    merge_commit TEXT,
+                    conflict_status TEXT,
                     FOREIGN KEY (repository_id) REFERENCES repositories(id) ON DELETE CASCADE,
                     FOREIGN KEY (source_branch_id) REFERENCES branches(id) ON DELETE SET NULL,
                     FOREIGN KEY (target_branch_id) REFERENCES branches(id) ON DELETE SET NULL
                 )
                 """);
+    }
+
+    private static void migrateMergesTable(Connection connection) throws SQLException {
+        if (!columnExists(connection, "merges", "strategy")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE merges ADD COLUMN strategy TEXT");
+            }
+        }
+        if (!columnExists(connection, "merges", "merge_commit")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE merges ADD COLUMN merge_commit TEXT");
+            }
+        }
+        if (!columnExists(connection, "merges", "conflict_status")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("ALTER TABLE merges ADD COLUMN conflict_status TEXT");
+            }
+        }
     }
 
     private static void createStashTable(Statement statement) throws SQLException {
