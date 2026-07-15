@@ -62,6 +62,10 @@ public class BranchRepository {
         return dao.countByRepositoryId(repositoryId);
     }
 
+    public int countAll() throws SQLException {
+        return dao.countAll();
+    }
+
     public boolean existsByNameIgnoreCase(long repositoryId, String name, Long excludeId) throws SQLException {
         return dao.existsByNameIgnoreCase(repositoryId, name, excludeId);
     }

@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -187,169 +181,7 @@
 
             <center>
                 <StackPane styleClass="page-host">
-                    <ScrollPane fx:id="dashboardPage" fitToWidth="true" hbarPolicy="NEVER"
-                                vbarPolicy="AS_NEEDED" styleClass="page-scroll">
-                        <VBox spacing="20" styleClass="content-area">
-                            <padding>
-                                <Insets top="20" right="24" bottom="24" left="24"/>
-                            </padding>
-
-                            <Label text="Overview" styleClass="section-title"/>
-
-                            <GridPane fx:id="statsGrid" hgap="14" vgap="14" styleClass="stats-grid">
-                                <columnConstraints>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25" minWidth="140"/>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25" minWidth="140"/>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25" minWidth="140"/>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="25" minWidth="140"/>
-                                </columnConstraints>
-
-                                <VBox fx:id="statCardRepository" styleClass="stat-card"
-                                      GridPane.columnIndex="0" GridPane.rowIndex="0">
-                                    <padding>
-                                        <Insets top="16" right="16" bottom="16" left="16"/>
-                                    </padding>
-                                    <HBox spacing="10" alignment="CENTER_LEFT">
-                                        <StackPane styleClass="stat-icon-wrap stat-icon-repo">
-                                            <FontIcon iconLiteral="mdi2s-source-repository" iconSize="18"
-                                                      styleClass="stat-icon"/>
-                                        </StackPane>
-                                        <Label text="Repository" styleClass="stat-label"/>
-                                    </HBox>
-                                    <Label fx:id="cardRepositoryValue" text="—" styleClass="stat-value">
-                                        <VBox.margin>
-                                            <Insets top="12"/>
-                                        </VBox.margin>
-                                    </Label>
-                                    <Label text="Active workspace" styleClass="stat-hint"/>
-                                </VBox>
-
-                                <VBox fx:id="statCardCommits" styleClass="stat-card"
-                                      GridPane.columnIndex="1" GridPane.rowIndex="0">
-                                    <padding>
-                                        <Insets top="16" right="16" bottom="16" left="16"/>
-                                    </padding>
-                                    <HBox spacing="10" alignment="CENTER_LEFT">
-                                        <StackPane styleClass="stat-icon-wrap stat-icon-commits">
-                                            <FontIcon iconLiteral="mdi2s-source-commit" iconSize="18"
-                                                      styleClass="stat-icon"/>
-                                        </StackPane>
-                                        <Label text="Total Commits" styleClass="stat-label"/>
-                                    </HBox>
-                                    <Label fx:id="cardCommitsValue" text="0" styleClass="stat-value">
-                                        <VBox.margin>
-                                            <Insets top="12"/>
-                                        </VBox.margin>
-                                    </Label>
-                                    <Label text="Across all branches" styleClass="stat-hint"/>
-                                </VBox>
-
-                                <VBox fx:id="statCardBranch" styleClass="stat-card"
-                                      GridPane.columnIndex="2" GridPane.rowIndex="0">
-                                    <padding>
-                                        <Insets top="16" right="16" bottom="16" left="16"/>
-                                    </padding>
-                                    <HBox spacing="10" alignment="CENTER_LEFT">
-                                        <StackPane styleClass="stat-icon-wrap stat-icon-branch">
-                                            <FontIcon iconLiteral="mdi2s-source-branch" iconSize="18"
-                                                      styleClass="stat-icon"/>
-                                        </StackPane>
-                                        <Label text="Active Branch" styleClass="stat-label"/>
-                                    </HBox>
-                                    <Label fx:id="cardBranchValue" text="—" styleClass="stat-value">
-                                        <VBox.margin>
-                                            <Insets top="12"/>
-                                        </VBox.margin>
-                                    </Label>
-                                    <Label text="Currently checked out" styleClass="stat-hint"/>
-                                </VBox>
-
-                                <VBox fx:id="statCardMerge" styleClass="stat-card"
-                                      GridPane.columnIndex="3" GridPane.rowIndex="0">
-                                    <padding>
-                                        <Insets top="16" right="16" bottom="16" left="16"/>
-                                    </padding>
-                                    <HBox spacing="10" alignment="CENTER_LEFT">
-                                        <StackPane styleClass="stat-icon-wrap stat-icon-merge">
-                                            <FontIcon iconLiteral="mdi2s-source-merge" iconSize="18"
-                                                      styleClass="stat-icon"/>
-                                        </StackPane>
-                                        <Label text="Merge Count" styleClass="stat-label"/>
-                                    </HBox>
-                                    <Label fx:id="cardMergeValue" text="0" styleClass="stat-value">
-                                        <VBox.margin>
-                                            <Insets top="12"/>
-                                        </VBox.margin>
-                                    </Label>
-                                    <Label text="Completed merges" styleClass="stat-hint"/>
-                                </VBox>
-                            </GridPane>
-
-                            <Label text="Activity" styleClass="section-title">
-                                <VBox.margin>
-                                    <Insets top="4"/>
-                                </VBox.margin>
-                            </Label>
-
-                            <GridPane fx:id="chartsGrid" hgap="14" vgap="14" styleClass="charts-grid"
-                                      VBox.vgrow="ALWAYS">
-                                <columnConstraints>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="58" minWidth="280"/>
-                                    <ColumnConstraints hgrow="ALWAYS" percentWidth="42" minWidth="240"/>
-                                </columnConstraints>
-
-                                <VBox fx:id="chartCardCommits" spacing="8" styleClass="chart-card"
-                                      GridPane.columnIndex="0" GridPane.rowIndex="0"
-                                      GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                                    <padding>
-                                        <Insets top="14" right="14" bottom="10" left="14"/>
-                                    </padding>
-                                    <Label text="Commit Activity" styleClass="chart-title"/>
-                                    <Label text="Placeholder trend for the last seven days"
-                                           styleClass="chart-subtitle"/>
-                                    <LineChart fx:id="commitActivityChart" createSymbols="true"
-                                               legendVisible="false" animated="false"
-                                               styleClass="dashboard-chart" VBox.vgrow="ALWAYS"
-                                               minHeight="240" prefHeight="280">
-                                        <xAxis>
-                                            <CategoryAxis label="Day" animated="false"/>
-                                        </xAxis>
-                                        <yAxis>
-                                            <NumberAxis label="Commits"
-                                                        forceZeroInRange="true" animated="false"
-                                                        autoRanging="false" lowerBound="0"
-                                                        upperBound="10" tickUnit="2"/>
-                                        </yAxis>
-                                    </LineChart>
-                                </VBox>
-
-                                <VBox fx:id="chartCardBranches" spacing="8" styleClass="chart-card"
-                                      GridPane.columnIndex="1" GridPane.rowIndex="0"
-                                      GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                                    <padding>
-                                        <Insets top="14" right="14" bottom="10" left="14"/>
-                                    </padding>
-                                    <Label text="Branch Activity" styleClass="chart-title"/>
-                                    <Label text="Placeholder commits by branch"
-                                           styleClass="chart-subtitle"/>
-                                    <BarChart fx:id="branchActivityChart" legendVisible="false"
-                                              animated="false" categoryGap="18"
-                                              styleClass="dashboard-chart" VBox.vgrow="ALWAYS"
-                                              minHeight="240" prefHeight="280">
-                                        <xAxis>
-                                            <CategoryAxis label="Branch" animated="false"/>
-                                        </xAxis>
-                                        <yAxis>
-                                            <NumberAxis label="Commits"
-                                                        forceZeroInRange="true" animated="false"
-                                                        autoRanging="false" lowerBound="0"
-                                                        upperBound="12" tickUnit="2"/>
-                                        </yAxis>
-                                    </BarChart>
-                                </VBox>
-                            </GridPane>
-                        </VBox>
-                    </ScrollPane>
+                    <fx:include fx:id="dashboardPage" source="analytics-dashboard-view.fxml"/>
 
                     <fx:include fx:id="repositoryPage" source="repository-view.fxml"
                                 visible="false" managed="false"/>

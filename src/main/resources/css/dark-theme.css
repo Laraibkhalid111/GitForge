@@ -567,9 +567,40 @@
     -fx-background-color: #0d1117;
 }
 
-.graph-legend-label {
+.stat-icon-health {
+    -fx-background-color: rgba(63, 185, 80, 0.15);
+}
+
+.activity-list {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: #0d1117;
+    -fx-background-insets: 0;
+    -fx-padding: 4;
+}
+
+.activity-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 4 8 4;
+    -fx-border-color: transparent transparent #21262d transparent;
+}
+
+.activity-title {
+    -fx-text-fill: #f0f6fc;
+    -fx-font-size: 12px;
+}
+
+.activity-meta {
     -fx-text-fill: #8b949e;
     -fx-font-size: 11px;
 }
+
+.activity-icon {
+    -fx-icon-color: #58a6ff;
+}
+
+.analytics-filter-bar {
+    -fx-alignment: center-left;
+}
+
 
 

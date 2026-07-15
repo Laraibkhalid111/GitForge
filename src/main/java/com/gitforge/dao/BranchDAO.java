@@ -57,6 +57,8 @@ public class BranchDAO extends AbstractDAO {
     private static final String COUNT_BY_REPOSITORY =
             "SELECT COUNT(*) FROM branches WHERE repository_id = ?";
 
+    private static final String COUNT_ALL = "SELECT COUNT(*) FROM branches";
+
     private static final String EXISTS_BY_NAME =
             "SELECT 1 FROM branches WHERE repository_id = ? AND name = ? COLLATE NOCASE "
                     + "AND (? IS NULL OR id <> ?) LIMIT 1";
@@ -167,6 +169,13 @@ public class BranchDAO extends AbstractDAO {
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt(1) : 0;
             }
+        }
+    }
+
+    public int countAll() throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_ALL);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getInt(1) : 0;
         }
     }
 
