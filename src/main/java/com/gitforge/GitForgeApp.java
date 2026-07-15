@@ -1,5 +1,6 @@
 package com.gitforge;
 
+import com.gitforge.service.DatabaseService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,14 +12,21 @@ import java.util.Objects;
 
 /**
  * GitForge application entry point.
- * Loads the main window shell only — no repository or database logic yet.
+ * Initializes the SQLite data layer, then loads the desktop shell.
  */
 public class GitForgeApp extends Application {
 
     private static final double DEFAULT_WIDTH = 1280;
     private static final double DEFAULT_HEIGHT = 800;
-    private static final double MIN_WIDTH = 960;
-    private static final double MIN_HEIGHT = 600;
+    private static final double MIN_WIDTH = 1024;
+    private static final double MIN_HEIGHT = 640;
+
+    private final DatabaseService databaseService = new DatabaseService();
+
+    @Override
+    public void init() throws Exception {
+        databaseService.initializeDatabase();
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -43,6 +51,11 @@ public class GitForgeApp extends Application {
         stage.setMinHeight(MIN_HEIGHT);
         stage.setScene(scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        databaseService.shutdown();
     }
 
     public static void main(String[] args) {

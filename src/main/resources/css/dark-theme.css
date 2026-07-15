@@ -1,10 +1,8 @@
-/* GitForge — Dark Theme
-   Primary palette tuned for a modern desktop Git visualizer.
-*/
+/* GitForge — Dark Theme */
 
 .root-pane {
-    -fx-background-color: #0f1115;
-    -fx-font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+    -fx-background-color: #0d1117;
+    -fx-font-family: "Segoe UI", "Candara", "Calibri", sans-serif;
     -fx-font-size: 13px;
 }
 
@@ -14,6 +12,27 @@
     -fx-background-color: #161b22;
     -fx-border-color: transparent #21262d transparent transparent;
     -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.sidebar-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.sidebar-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+
+.sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #30363d;
+    -fx-background-radius: 4;
 }
 
 .brand-title {
@@ -39,7 +58,6 @@
     -fx-text-fill: #6e7681;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 1px;
 }
 
 .nav-item {
@@ -53,7 +71,7 @@
 }
 
 .nav-item-selected {
-    -fx-background-color: #1f6feb33;
+    -fx-background-color: rgba(56, 139, 253, 0.16);
 }
 
 .nav-item-selected .nav-label {
@@ -74,29 +92,236 @@
     -fx-icon-color: #8b949e;
 }
 
-/* ---------- Content ---------- */
+/* ---------- Main shell ---------- */
 
-.content-area {
-    -fx-background-color: #0f1115;
+.main-shell {
+    -fx-background-color: #0d1117;
 }
 
-.page-title {
+.toolbar {
+    -fx-background-color: #161b22;
+    -fx-border-color: transparent transparent #21262d transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.toolbar-title {
     -fx-text-fill: #f0f6fc;
-    -fx-font-size: 28px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
-.page-subtitle {
+.toolbar-subtitle {
     -fx-text-fill: #8b949e;
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
 }
 
-.placeholder-card {
-    -fx-background-color: #161b22;
-    -fx-background-radius: 12;
-    -fx-border-color: #21262d;
-    -fx-border-radius: 12;
+.toolbar-button {
+    -fx-background-color: #21262d;
+    -fx-text-fill: #c9d1d9;
+    -fx-background-radius: 8;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 8;
     -fx-border-width: 1;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+
+.toolbar-button:hover {
+    -fx-background-color: #30363d;
+}
+
+.toolbar-button-primary {
+    -fx-background-color: #238636;
+    -fx-border-color: #2ea043;
+    -fx-text-fill: #ffffff;
+}
+
+.toolbar-button-primary:hover {
+    -fx-background-color: #2ea043;
+}
+
+.toolbar-button-icon {
+    -fx-icon-color: #c9d1d9;
+}
+
+.toolbar-button-primary .toolbar-button-icon {
+    -fx-icon-color: #ffffff;
+}
+
+.page-host,
+.page-scroll,
+.page-scroll > .viewport {
+    -fx-background-color: #0d1117;
+}
+
+.page-scroll {
+    -fx-background: #0d1117;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.page-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #30363d;
+    -fx-background-radius: 4;
+}
+
+.content-area {
+    -fx-background-color: #0d1117;
+}
+
+.section-title {
+    -fx-text-fill: #f0f6fc;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Dashboard cards ---------- */
+
+.stats-grid,
+.charts-grid {
+    -fx-max-width: infinity;
+}
+
+.stat-card {
+    -fx-background-color: #161b22;
+    -fx-background-radius: 10;
+    -fx-border-color: #21262d;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-min-width: 140;
+    -fx-max-width: infinity;
+}
+
+.stat-icon-wrap {
+    -fx-pref-width: 32;
+    -fx-pref-height: 32;
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-background-radius: 8;
+    -fx-alignment: center;
+}
+
+.stat-icon-repo {
+    -fx-background-color: rgba(88, 166, 255, 0.15);
+}
+
+.stat-icon-commits {
+    -fx-background-color: rgba(63, 185, 80, 0.15);
+}
+
+.stat-icon-branch {
+    -fx-background-color: rgba(210, 153, 34, 0.18);
+}
+
+.stat-icon-merge {
+    -fx-background-color: rgba(163, 113, 247, 0.18);
+}
+
+.stat-icon-repo .stat-icon {
+    -fx-icon-color: #58a6ff;
+}
+
+.stat-icon-commits .stat-icon {
+    -fx-icon-color: #3fb950;
+}
+
+.stat-icon-branch .stat-icon {
+    -fx-icon-color: #d29922;
+}
+
+.stat-icon-merge .stat-icon {
+    -fx-icon-color: #a371f7;
+}
+
+.stat-label {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 12px;
+}
+
+.stat-value {
+    -fx-text-fill: #f0f6fc;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.stat-hint {
+    -fx-text-fill: #6e7681;
+    -fx-font-size: 11px;
+}
+
+/* ---------- Charts ---------- */
+
+.chart-card {
+    -fx-background-color: #161b22;
+    -fx-background-radius: 10;
+    -fx-border-color: #21262d;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.chart-title {
+    -fx-text-fill: #f0f6fc;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.chart-subtitle {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 12px;
+}
+
+.dashboard-chart {
+    -fx-background-color: transparent;
+    -fx-padding: 4 0 0 0;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines {
+    -fx-stroke: #21262d;
+}
+
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.axis {
+    -fx-tick-label-fill: #8b949e;
+}
+
+.axis-label {
+    -fx-text-fill: #8b949e;
+}
+
+.axis-tick-mark,
+.axis-minor-tick-mark {
+    -fx-stroke: #30363d;
+}
+
+.chart-series-line {
+    -fx-stroke: #58a6ff;
+    -fx-stroke-width: 2.5px;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #58a6ff, #0d1117;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
+
+.default-color0.chart-bar {
+    -fx-bar-fill: #3fb950;
+}
+
+/* ---------- Module placeholder ---------- */
+
+.module-placeholder {
+    -fx-background-color: #0d1117;
 }
 
 .placeholder-icon {
@@ -105,7 +330,7 @@
 
 .placeholder-title {
     -fx-text-fill: #f0f6fc;
-    -fx-font-size: 18px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
 }
 
@@ -115,7 +340,31 @@
     -fx-text-alignment: center;
 }
 
-/* ---------- Shared controls ---------- */
+/* ---------- Status bar ---------- */
+
+.status-bar {
+    -fx-background-color: #161b22;
+    -fx-border-color: #21262d transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.status-message,
+.status-page,
+.status-version {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 12px;
+}
+
+.status-ready-icon {
+    -fx-icon-color: #3fb950;
+}
+
+.status-separator *.line {
+    -fx-border-color: #30363d;
+    -fx-border-width: 0 1 0 0;
+}
+
+/* ---------- Shared ---------- */
 
 .label {
     -fx-text-fill: #c9d1d9;
@@ -124,4 +373,8 @@
 .separator *.line {
     -fx-border-color: #21262d;
     -fx-border-width: 1 0 0 0;
+}
+
+.button {
+    -fx-font-size: 12px;
 }

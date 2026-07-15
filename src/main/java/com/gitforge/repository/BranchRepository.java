@@ -1,0 +1,48 @@
+package com.gitforge.repository;
+
+import com.gitforge.dao.BranchDAO;
+import com.gitforge.model.Branch;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repository-pattern wrapper over {@link BranchDAO}.
+ */
+public class BranchRepository {
+
+    private final BranchDAO dao;
+
+    public BranchRepository() {
+        this(new BranchDAO());
+    }
+
+    public BranchRepository(BranchDAO dao) {
+        this.dao = dao;
+    }
+
+    public long create(Branch branch) throws SQLException {
+        return dao.create(branch);
+    }
+
+    public Optional<Branch> findById(long id) throws SQLException {
+        return dao.findById(id);
+    }
+
+    public boolean update(Branch branch) throws SQLException {
+        return dao.update(branch);
+    }
+
+    public boolean delete(long id) throws SQLException {
+        return dao.delete(id);
+    }
+
+    public List<Branch> findAll() throws SQLException {
+        return dao.findAll();
+    }
+
+    public List<Branch> search(String query) throws SQLException {
+        return dao.search(query);
+    }
+}
