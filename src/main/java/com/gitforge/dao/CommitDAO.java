@@ -67,6 +67,9 @@ public class CommitDAO extends AbstractDAO {
     private static final String COUNT_BY_REPOSITORY =
             "SELECT COUNT(*) FROM commits WHERE repository_id = ?";
 
+    private static final String COUNT_BY_BRANCH =
+            "SELECT COUNT(*) FROM commits WHERE branch_id = ?";
+
     private static final String COUNT_ALL = "SELECT COUNT(*) FROM commits";
 
     public long create(Commit commit) throws SQLException {
@@ -160,6 +163,15 @@ public class CommitDAO extends AbstractDAO {
     public int countByRepositoryId(long repositoryId) throws SQLException {
         try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_REPOSITORY)) {
             statement.setLong(1, repositoryId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt(1) : 0;
+            }
+        }
+    }
+
+    public int countByBranchId(long branchId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_BRANCH)) {
+            statement.setLong(1, branchId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt(1) : 0;
             }

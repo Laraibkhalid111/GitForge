@@ -46,6 +46,10 @@ public class BranchRepository {
         return dao.search(query);
     }
 
+    public List<Branch> searchByRepository(long repositoryId, String query) throws SQLException {
+        return dao.searchByRepository(repositoryId, query);
+    }
+
     public List<Branch> findByRepositoryId(long repositoryId) throws SQLException {
         return dao.findByRepositoryId(repositoryId);
     }
@@ -56,5 +60,17 @@ public class BranchRepository {
 
     public int countByRepositoryId(long repositoryId) throws SQLException {
         return dao.countByRepositoryId(repositoryId);
+    }
+
+    public boolean existsByNameIgnoreCase(long repositoryId, String name, Long excludeId) throws SQLException {
+        return dao.existsByNameIgnoreCase(repositoryId, name, excludeId);
+    }
+
+    public void deactivateAllInRepository(long repositoryId) throws SQLException {
+        dao.deactivateAllInRepository(repositoryId);
+    }
+
+    public void reparentChildren(long oldParentId, Long newParentId) throws SQLException {
+        dao.reparentChildren(oldParentId, newParentId);
     }
 }

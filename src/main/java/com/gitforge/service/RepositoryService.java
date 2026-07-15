@@ -72,6 +72,7 @@ public class RepositoryService {
             long repositoryId = repositoryRepository.create(repository);
 
             Branch branch = new Branch(repositoryId, branchName, true);
+            branch.setStatus(Branch.STATUS_ACTIVE);
             branchRepository.create(branch);
 
             connection.commit();

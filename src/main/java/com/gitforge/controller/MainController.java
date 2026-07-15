@@ -29,6 +29,7 @@ public class MainController {
         DASHBOARD,
         REPOSITORY,
         COMMITS,
+        BRANCHES,
         PLACEHOLDER
     }
 
@@ -56,6 +57,10 @@ public class MainController {
     private BorderPane commitPage;
     @FXML
     private CommitController commitPageController;
+    @FXML
+    private BorderPane branchPage;
+    @FXML
+    private BranchController branchPageController;
     @FXML
     private VBox modulePlaceholderPage;
     @FXML
@@ -139,6 +144,9 @@ public class MainController {
         if (commitPageController != null) {
             commitPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
         }
+        if (branchPageController != null) {
+            branchPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
+        }
 
         populatePlaceholderCharts();
         refreshDashboardStats();
@@ -163,8 +171,7 @@ public class MainController {
 
     @FXML
     private void onBranchesSelected() {
-        showModule(navBranches, "Branches", "mdi2s-source-branch",
-                "Create, switch, and compare simulated branches.");
+        showBranchPage();
     }
 
     @FXML
@@ -207,6 +214,11 @@ public class MainController {
         if (currentPage == Page.COMMITS && commitPageController != null) {
             commitPageController.onPageShown();
             statusMessageLabel.setText("Commit history refreshed");
+            return;
+        }
+        if (currentPage == Page.BRANCHES && branchPageController != null) {
+            branchPageController.onPageShown();
+            statusMessageLabel.setText("Branch list refreshed");
             return;
         }
         if (currentPage == Page.DASHBOARD) {
@@ -253,6 +265,16 @@ public class MainController {
         statusMessageLabel.setText("Ready");
     }
 
+    private void showBranchPage() {
+        selectNav(navBranches);
+        updateChrome("Branches", "Manage simulated branches");
+        showPage(Page.BRANCHES);
+        if (branchPageController != null) {
+            branchPageController.onPageShown();
+        }
+        statusMessageLabel.setText("Ready");
+    }
+
     private void showModule(VBox navItem, String title, String iconLiteral, String body) {
         selectNav(navItem);
         updateChrome(title, "Module placeholder");
@@ -274,6 +296,7 @@ public class MainController {
         setVisible(dashboardPage, page == Page.DASHBOARD);
         setVisible(repositoryPage, page == Page.REPOSITORY);
         setVisible(commitPage, page == Page.COMMITS);
+        setVisible(branchPage, page == Page.BRANCHES);
         setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
     }
 

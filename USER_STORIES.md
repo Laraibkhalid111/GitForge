@@ -29,7 +29,7 @@ A Desktop Git Version Control Simulator built using Java, JavaFX, SQLite, and ad
 
 Technology
 
-Java 24
+Java 25
 
 JavaFX
 

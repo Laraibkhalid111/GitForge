@@ -31,7 +31,7 @@ A Desktop Git Version Control Simulator built using Java, JavaFX, SQLite and adv
 Technology Stack
 
 Language
-Java 24
+Java 25
 
 UI
 JavaFX

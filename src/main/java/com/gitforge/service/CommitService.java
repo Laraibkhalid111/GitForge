@@ -132,6 +132,12 @@ public class CommitService {
         connection.setAutoCommit(false);
         try {
             commitRepository.create(commit);
+            Optional<Branch> branchOptional = branchRepository.findById(branchId);
+            if (branchOptional.isPresent()) {
+                Branch ownedBranch = branchOptional.get();
+                ownedBranch.setLatestCommitHash(hash);
+                branchRepository.update(ownedBranch);
+            }
             connection.commit();
             Commit persisted = commitRepository.findById(commit.getId()).orElseThrow();
             insertCommit(persisted);

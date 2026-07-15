@@ -66,6 +66,10 @@ public class CommitRepository {
         return dao.countByRepositoryId(repositoryId);
     }
 
+    public int countByBranchId(long branchId) throws SQLException {
+        return dao.countByBranchId(branchId);
+    }
+
     public int countAll() throws SQLException {
         return dao.countAll();
     }

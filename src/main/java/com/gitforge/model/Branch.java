@@ -8,11 +8,18 @@ import java.util.Objects;
  */
 public class Branch {
 
+    public static final String STATUS_ACTIVE = "Active";
+    public static final String STATUS_INACTIVE = "Inactive";
+
     private Long id;
     private Long repositoryId;
     private String name;
     private boolean active;
     private Instant createdAt;
+    private Long parentBranchId;
+    private String description;
+    private String latestCommitHash;
+    private String status;
 
     public Branch() {
     }
@@ -21,6 +28,7 @@ public class Branch {
         this.repositoryId = repositoryId;
         this.name = name;
         this.active = active;
+        this.status = active ? STATUS_ACTIVE : STATUS_INACTIVE;
     }
 
     public Branch(Long id, Long repositoryId, String name, boolean active, Instant createdAt) {
@@ -29,6 +37,7 @@ public class Branch {
         this.name = name;
         this.active = active;
         this.createdAt = createdAt;
+        this.status = active ? STATUS_ACTIVE : STATUS_INACTIVE;
     }
 
     public Long getId() {
@@ -61,6 +70,7 @@ public class Branch {
 
     public void setActive(boolean active) {
         this.active = active;
+        this.status = active ? STATUS_ACTIVE : STATUS_INACTIVE;
     }
 
     public Instant getCreatedAt() {
@@ -69,6 +79,41 @@ public class Branch {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Long getParentBranchId() {
+        return parentBranchId;
+    }
+
+    public void setParentBranchId(Long parentBranchId) {
+        this.parentBranchId = parentBranchId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLatestCommitHash() {
+        return latestCommitHash;
+    }
+
+    public void setLatestCommitHash(String latestCommitHash) {
+        this.latestCommitHash = latestCommitHash;
+    }
+
+    public String getStatus() {
+        if (status == null || status.isBlank()) {
+            return active ? STATUS_ACTIVE : STATUS_INACTIVE;
+        }
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -96,12 +141,6 @@ public class Branch {
 
     @Override
     public String toString() {
-        return "Branch{"
-                + "id=" + id
-                + ", repositoryId=" + repositoryId
-                + ", name='" + name + '\''
-                + ", active=" + active
-                + ", createdAt=" + createdAt
-                + '}';
+        return name == null ? "Branch" : name;
     }
 }
