@@ -116,9 +116,21 @@
                        styleClass="placeholder-body" visible="false" managed="false"/>
 
                 <Label text="Branch Hierarchy" styleClass="section-title"/>
-                <TextArea fx:id="hierarchyArea" editable="false" wrapText="false" prefRowCount="5"
-                          styleClass="dialog-field dialog-textarea"
-                          promptText="Select a repository to view the branch tree."/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Tree from the selected repository" styleClass="chart-subtitle" HBox.hgrow="ALWAYS"/>
+                    <Button text="View Branch Tree" styleClass="toolbar-button" onAction="#onViewTreeClicked">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2f-file-tree" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Rebuild and show the branch tree"/>
+                        </tooltip>
+                    </Button>
+                </HBox>
+                <TextArea fx:id="hierarchyArea" editable="false" wrapText="false" prefRowCount="8"
+                          styleClass="hierarchy-area"
+                          promptText="Select a repository to view the branch tree."
+                          VBox.vgrow="ALWAYS"/>
             </VBox>
 
             <VBox spacing="10" styleClass="repo-details-card" prefWidth="320" minWidth="280">

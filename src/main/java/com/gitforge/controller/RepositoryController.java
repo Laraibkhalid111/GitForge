@@ -291,7 +291,7 @@ public class RepositoryController {
 
     private boolean confirmDelete(RepositorySummary summary) {
         Window owner = repositoryTable.getScene() == null ? null : repositoryTable.getScene().getWindow();
-        return UiDialogs.confirm(
+        return UiDialogs.confirmDelete(
                 owner,
                 "Delete Repository",
                 "Delete \"" + summary.getName() + "\"?",

@@ -66,10 +66,7 @@ public final class SplashScreen {
         }
 
         Scene scene = new Scene(root, 420, 280);
-        scene.getStylesheets().add(Objects.requireNonNull(
-                SplashScreen.class.getResource("/css/dark-theme.css"),
-                "dark-theme.css not found"
-        ).toExternalForm());
+        scene.getStylesheets().add(ThemeManager.currentDialogStylesheet());
 
         splash.setScene(scene);
         splash.setAlwaysOnTop(true);

@@ -1,0 +1,194 @@
+/* GitForge — Light Theme */
+
+.root-pane {
+    -fx-background-color: #f6f8fa;
+    -fx-font-family: "Segoe UI Semibold", "Segoe UI", "Candara", "Calibri", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent #d0d7de transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-scroll,
+.sidebar-scroll .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.brand-title { -fx-text-fill: #1f2328; -fx-font-size: 18px; -fx-font-weight: bold; }
+.brand-subtitle { -fx-text-fill: #656d76; -fx-font-size: 11px; }
+.brand-icon-wrap {
+    -fx-pref-width: 40; -fx-pref-height: 40; -fx-min-width: 40; -fx-min-height: 40;
+    -fx-background-color: rgba(9, 105, 218, 0.12);
+    -fx-background-radius: 10; -fx-alignment: center;
+    -fx-border-color: #0969da; -fx-border-radius: 10; -fx-border-width: 1;
+}
+.brand-icon { -fx-icon-color: #0969da; }
+.sidebar-footer { -fx-text-fill: #656d76; -fx-font-size: 10px; -fx-padding: 12 10 4 10; }
+.sidebar-separator { -fx-background-color: #d0d7de; }
+.nav-section-label { -fx-text-fill: #656d76; -fx-font-size: 10px; -fx-font-weight: bold; }
+
+.nav-item {
+    -fx-background-color: transparent; -fx-background-radius: 10;
+    -fx-border-color: transparent; -fx-border-width: 1; -fx-border-radius: 10; -fx-cursor: hand;
+}
+.nav-item:hover { -fx-background-color: #eaeef2; -fx-border-color: #d0d7de; }
+.nav-item-selected { -fx-background-color: rgba(9, 105, 218, 0.12); -fx-border-color: #0969da; }
+.nav-item-selected .nav-label { -fx-text-fill: #0969da; -fx-font-weight: bold; }
+.nav-item-selected .nav-icon { -fx-icon-color: #0969da; }
+.nav-label { -fx-text-fill: #1f2328; -fx-font-size: 13px; }
+.nav-icon { -fx-icon-color: #656d76; }
+
+.main-shell, .page-host, .page-scroll, .page-scroll > .viewport,
+.content-area, .repository-page, .module-placeholder {
+    -fx-background-color: #f6f8fa;
+}
+.page-scroll { -fx-background: #f6f8fa; -fx-border-color: transparent; }
+
+.toolbar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #d0d7de transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.toolbar-title { -fx-text-fill: #1f2328; -fx-font-size: 16px; -fx-font-weight: bold; }
+.toolbar-subtitle { -fx-text-fill: #656d76; -fx-font-size: 12px; }
+.section-title { -fx-text-fill: #1f2328; -fx-font-size: 15px; -fx-font-weight: bold; }
+
+.button, .toolbar-button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2328;
+    -fx-background-radius: 8;
+    -fx-border-color: #d0d7de;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.button:hover, .toolbar-button:hover {
+    -fx-background-color: #eaeef2;
+    -fx-border-color: #0969da;
+}
+.toolbar-button-primary {
+    -fx-background-color: #1a7f37;
+    -fx-border-color: #1a7f37;
+    -fx-text-fill: #ffffff;
+}
+.toolbar-button-primary:hover { -fx-background-color: #2da44e; }
+.toolbar-button-icon { -fx-icon-color: #1f2328; }
+.toolbar-button-primary .toolbar-button-icon { -fx-icon-color: #ffffff; }
+.toolbar-button-danger {
+    -fx-background-color: #fff5f5;
+    -fx-border-color: #cf222e;
+    -fx-text-fill: #cf222e;
+}
+.window-control-button { -fx-min-width: 36; -fx-padding: 8 10 8 10; }
+.window-close-button:hover { -fx-background-color: #cf222e; -fx-border-color: #a40e26; }
+.window-close-button:hover .toolbar-button-icon { -fx-icon-color: #ffffff; }
+
+.stat-card, .chart-card, .repo-table-card, .repo-details-card, .welcome-card, .settings-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #d0d7de;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(31, 35, 40, 0.08), 10, 0.12, 0, 2);
+}
+.stat-value, .detail-value, .placeholder-title { -fx-text-fill: #1f2328; }
+.stat-label, .detail-label, .chart-subtitle, .placeholder-body { -fx-text-fill: #656d76; }
+.chart-title, .activity-title { -fx-text-fill: #1f2328; }
+.label { -fx-text-fill: #1f2328; }
+
+.repo-search-field, .dialog-field, .combo-box, .date-picker, .text-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2328;
+    -fx-prompt-text-fill: #656d76;
+    -fx-background-radius: 8;
+    -fx-border-color: #d0d7de;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 8 10 8 10;
+}
+.repo-search-field:focused, .dialog-field:focused, .combo-box:focused, .text-field:focused {
+    -fx-border-color: #0969da;
+}
+
+.repo-table .column-header .label { -fx-text-fill: #656d76; -fx-font-weight: bold; }
+.repo-table .table-cell { -fx-text-fill: #1f2328; }
+.repo-table .table-row-cell:hover { -fx-background-color: #eaeef2; }
+.repo-table .table-row-cell:selected { -fx-background-color: rgba(9, 105, 218, 0.15); }
+
+.activity-list {
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-border-color: #d0d7de;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+.activity-meta { -fx-text-fill: #656d76; }
+.activity-icon { -fx-icon-color: #0969da; }
+
+.status-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d0d7de transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+.status-message, .status-page, .status-version { -fx-text-fill: #656d76; -fx-font-size: 12px; }
+.status-ready-icon { -fx-icon-color: #1a7f37; }
+
+.settings-tab-pane { -fx-background-color: transparent; }
+.settings-tab-pane *.tab-header-area *.tab-header-background { -fx-background-color: transparent; }
+.settings-tab-pane .tab {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-color: #d0d7de;
+    -fx-padding: 8 14 8 14;
+}
+.settings-tab-pane .tab:selected {
+    -fx-background-color: #ddf4ff;
+    -fx-border-color: #0969da;
+}
+.settings-tab-pane .tab .tab-label { -fx-text-fill: #1f2328; }
+.settings-tab-pane .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-border-color: #d0d7de;
+    -fx-border-radius: 0 0 12 12;
+    -fx-padding: 14;
+}
+
+.toast-banner {
+    -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-width: 1;
+    -fx-padding: 12 16 12 16; -fx-max-width: 460;
+}
+.toast-success { -fx-background-color: #dafbe1; -fx-border-color: #1a7f37; }
+.toast-info { -fx-background-color: #ddf4ff; -fx-border-color: #0969da; }
+.toast-message { -fx-text-fill: #1f2328; }
+.toast-icon { -fx-icon-color: #1a7f37; }
+
+.gitforge-dialog { -fx-background-color: #ffffff; }
+.gitforge-dialog:header *.header-panel { -fx-background-color: #f6f8fa; }
+.gitforge-dialog:header *.header-panel *.label { -fx-text-fill: #1f2328; }
+.gitforge-dialog > .content.label { -fx-text-fill: #1f2328; }
+.gitforge-dialog *.button {
+    -fx-background-color: #ffffff; -fx-text-fill: #1f2328;
+    -fx-border-color: #d0d7de; -fx-background-radius: 8; -fx-border-radius: 8;
+}
+.gitforge-dialog *.button:default {
+    -fx-background-color: #1a7f37; -fx-border-color: #1a7f37; -fx-text-fill: #ffffff;
+}
+
+.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
+    -fx-background-color: #afb8c1; -fx-background-radius: 4;
+}
+.mfx-progress-spinner .arc { -fx-stroke: #0969da; }
+.loading-overlay { -fx-background-color: rgba(246, 248, 250, 0.55); }
+.loading-panel {
+    -fx-background-color: #ffffff; -fx-background-radius: 12;
+    -fx-border-color: #d0d7de; -fx-border-radius: 12; -fx-padding: 20 28 20 28;
+}
+.loading-label { -fx-text-fill: #1f2328; }

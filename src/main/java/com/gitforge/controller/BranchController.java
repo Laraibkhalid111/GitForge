@@ -98,6 +98,8 @@ public class BranchController {
 
     private Consumer<String> statusReporter = message -> {
     };
+    private Runnable mergeNavigator = () -> {
+    };
 
     @FXML
     private void initialize() {
@@ -118,7 +120,12 @@ public class BranchController {
         searchField.textProperty().addListener((obs, oldValue, newValue) -> refreshTable());
         clearDetails();
         loadRepositories();
-        refreshTable();
+        if (repositoryComboBox.getSelectionModel().getSelectedItem() == null
+                && !repositoryComboBox.getItems().isEmpty()) {
+            repositoryComboBox.getSelectionModel().selectFirst();
+        } else {
+            refreshTable();
+        }
     }
 
     public void setStatusReporter(Consumer<String> statusReporter) {
@@ -126,9 +133,19 @@ public class BranchController {
         } : statusReporter;
     }
 
+    public void setMergeNavigator(Runnable mergeNavigator) {
+        this.mergeNavigator = mergeNavigator == null ? () -> {
+        } : mergeNavigator;
+    }
+
     public void onPageShown() {
         loadRepositories();
-        refreshTable();
+        if (repositoryComboBox.getSelectionModel().getSelectedItem() == null
+                && !repositoryComboBox.getItems().isEmpty()) {
+            repositoryComboBox.getSelectionModel().selectFirst();
+        } else {
+            refreshTable();
+        }
     }
 
     @FXML
@@ -184,7 +201,7 @@ public class BranchController {
         }
 
         Window owner = branchTable.getScene() == null ? null : branchTable.getScene().getWindow();
-        if (!UiDialogs.confirm(
+        if (!UiDialogs.confirmDelete(
                 owner,
                 "Delete Branch",
                 "Delete branch \"" + selected.getName() + "\"?",
@@ -233,13 +250,42 @@ public class BranchController {
             report("Select a branch first");
             return;
         }
-        report("Use the Merge module to simulate merging \"" + selected.getName() + "\"");
+        report("Opening Merge for \"" + selected.getName() + "\"");
+        mergeNavigator.run();
     }
 
     @FXML
     private void onRefreshClicked() {
         refreshTable();
         report("Branch list refreshed");
+    }
+
+    @FXML
+    private void onViewTreeClicked() {
+        Repository selected = repositoryComboBox.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            if (!repositoryComboBox.getItems().isEmpty()) {
+                repositoryComboBox.getSelectionModel().selectFirst();
+                selected = repositoryComboBox.getSelectionModel().getSelectedItem();
+            }
+        }
+        if (selected == null) {
+            hierarchyArea.setText("Create or select a repository to view the branch tree.");
+            report("Select a repository to view the branch tree");
+            return;
+        }
+        try {
+            branchService.listSummaries(selected.getId());
+            updateHierarchyDisplay(selected.getId());
+            if (hierarchyArea.getText() == null || hierarchyArea.getText().isBlank()
+                    || hierarchyArea.getText().startsWith("No branch")) {
+                report("No branch hierarchy available");
+            } else {
+                report("Branch tree updated for " + selected.getName());
+            }
+        } catch (SQLException ex) {
+            showError("Unable to view branch tree", ex.getMessage());
+        }
     }
 
     private void loadRepositories() {
@@ -253,8 +299,16 @@ public class BranchController {
                         .findFirst()
                         .ifPresentOrElse(
                                 repo -> repositoryComboBox.getSelectionModel().select(repo),
-                                () -> repositoryComboBox.getSelectionModel().clearSelection()
+                                () -> {
+                                    if (!repositories.isEmpty()) {
+                                        repositoryComboBox.getSelectionModel().selectFirst();
+                                    } else {
+                                        repositoryComboBox.getSelectionModel().clearSelection();
+                                    }
+                                }
                         );
+            } else if (!repositories.isEmpty()) {
+                repositoryComboBox.getSelectionModel().selectFirst();
             }
         } catch (SQLException ex) {
             showError("Unable to load repositories", ex.getMessage());
@@ -286,6 +340,7 @@ public class BranchController {
         } else {
             hierarchyArea.setText(String.join("\n", lines));
         }
+        hierarchyArea.positionCaret(0);
     }
 
     private void configureTable() {

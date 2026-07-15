@@ -2,6 +2,7 @@ package com.gitforge.service;
 
 import com.gitforge.database.DatabaseManager;
 import com.gitforge.model.Branch;
+import com.gitforge.model.BranchSummary;
 import com.gitforge.model.CommitSummary;
 import com.gitforge.model.RepositorySummary;
 import com.gitforge.util.LinkedList;
@@ -91,5 +92,49 @@ class CommitServiceTest {
         LinkedList<com.gitforge.model.Commit> history = commitService.getCommitHistory();
         assertEquals(1, history.size());
         assertTrue(history.find(c -> created.getId().equals(c.getId())).isPresent());
+    }
+
+    @Test
+    void firstCommitOnForkedBranchUsesParentTipAsParentHash() throws Exception {
+        BranchService branchService = new BranchService();
+        RepositorySummary repo = repositoryService.createRepository("Fork", null, null, "main");
+        Branch main = commitService.listBranchesForRepository(repo.getId()).getFirst();
+
+        CommitSummary onMain = commitService.createCommit(
+                repo.getId(), main.getId(), "Root work", "Alice", "Feature");
+        BranchSummary feature = branchService.createBranch(repo.getId(), "feature", main.getId(), "fork");
+
+        CommitSummary onFeature = commitService.createCommit(
+                repo.getId(), feature.getId(), "Feature work", "Alice", "Feature");
+
+        assertEquals(onMain.getHash(), onFeature.getParentHash());
+    }
+
+    @Test
+    void deleteTipRepairsBranchLatestCommit() throws Exception {
+        RepositorySummary repo = repositoryService.createRepository("TipRepair", null, null, "main");
+        Branch main = commitService.listBranchesForRepository(repo.getId()).getFirst();
+
+        CommitSummary first = commitService.createCommit(
+                repo.getId(), main.getId(), "First", "Alice", "Feature");
+        CommitSummary tip = commitService.createCommit(
+                repo.getId(), main.getId(), "Tip", "Alice", "Feature");
+
+        assertTrue(commitService.deleteCommit(tip.getId()));
+
+        Branch refreshed = commitService.listBranchesForRepository(repo.getId()).getFirst();
+        assertEquals(first.getHash(), refreshed.getLatestCommitHash());
+    }
+
+    @Test
+    void findCommitFallsBackToDatabase() throws Exception {
+        RepositorySummary repo = repositoryService.createRepository("Lookup", null, null, "main");
+        Branch main = commitService.listBranchesForRepository(repo.getId()).getFirst();
+        CommitSummary created = commitService.createCommit(
+                repo.getId(), main.getId(), "Persisted", "Alice", "Feature");
+
+        CommitService fresh = new CommitService();
+        assertTrue(fresh.findCommit(created.getId()).isPresent());
+        assertTrue(fresh.findSummaryById(created.getId()).isPresent());
     }
 }

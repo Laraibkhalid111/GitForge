@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -73,8 +74,12 @@ public class CommitService {
         return Optional.of(toSummary(commit.get()));
     }
 
-    public Optional<Commit> findCommit(long id) {
-        return commitHistory.find(candidate -> candidate.getId() != null && candidate.getId() == id);
+    public Optional<Commit> findCommit(long id) throws SQLException {
+        Optional<Commit> inMemory = commitHistory.find(candidate -> candidate.getId() != null && candidate.getId() == id);
+        if (inMemory.isPresent()) {
+            return inMemory;
+        }
+        return commitRepository.findById(id);
     }
 
     public List<Commit> traverseHistory() {
@@ -112,7 +117,10 @@ public class CommitService {
         Instant committedAt = Instant.now();
         String parentHash = commitRepository.findLatestByBranchId(branchId)
                 .map(Commit::getHash)
-                .orElse(null);
+                .orElseGet(() -> {
+                    String tip = branch.getLatestCommitHash();
+                    return tip == null || tip.isBlank() ? null : tip;
+                });
         String hash = generateUniqueHash(repositoryId, branchId, message, normalizedAuthor, committedAt);
         int filesChanged = simulateFilesChanged(normalizedType);
 
@@ -141,6 +149,7 @@ public class CommitService {
             connection.commit();
             Commit persisted = commitRepository.findById(commit.getId()).orElseThrow();
             insertCommit(persisted);
+            AnalyticsService.invalidateSharedCache();
             return toSummary(persisted);
         } catch (SQLException | RuntimeException ex) {
             connection.rollback();
@@ -154,11 +163,45 @@ public class CommitService {
     }
 
     public boolean deleteCommit(long id) throws SQLException {
-        if (commitRepository.delete(id)) {
-            deleteCommitFromHistory(id);
-            return true;
+        Optional<Commit> existing = commitRepository.findById(id);
+        if (existing.isEmpty()) {
+            return false;
         }
-        return false;
+        Commit commit = existing.get();
+
+        Connection connection = ConnectionManager.getInstance().getConnection();
+        boolean previous = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+        try {
+            boolean deleted = commitRepository.delete(id);
+            if (deleted && commit.getBranchId() != null) {
+                Optional<Branch> branchOptional = branchRepository.findById(commit.getBranchId());
+                if (branchOptional.isPresent()) {
+                    Branch ownedBranch = branchOptional.get();
+                    if (Objects.equals(ownedBranch.getLatestCommitHash(), commit.getHash())) {
+                        String repairedTip = commitRepository.findLatestByBranchId(commit.getBranchId())
+                                .map(Commit::getHash)
+                                .orElse(null);
+                        ownedBranch.setLatestCommitHash(repairedTip);
+                        branchRepository.update(ownedBranch);
+                    }
+                }
+            }
+            connection.commit();
+            if (deleted) {
+                deleteCommitFromHistory(id);
+                AnalyticsService.invalidateSharedCache();
+            }
+            return deleted;
+        } catch (SQLException | RuntimeException ex) {
+            connection.rollback();
+            if (ex instanceof SQLException sqlException) {
+                throw sqlException;
+            }
+            throw new SQLException("Unable to delete commit", ex);
+        } finally {
+            connection.setAutoCommit(previous);
+        }
     }
 
     public void insertCommit(Commit commit) {

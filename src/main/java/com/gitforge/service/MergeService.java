@@ -173,6 +173,7 @@ public class MergeService {
             repositoryRepository.update(repository);
 
             connection.commit();
+            AnalyticsService.invalidateSharedCache();
             return toSummary(mergeRepository.findById(merge.getId()).orElseThrow());
         } catch (SQLException | RuntimeException ex) {
             connection.rollback();

@@ -221,6 +221,16 @@ public final class DatabaseInitializer {
         try (PreparedStatement statement = connection.prepareStatement(SEED_SETTING)) {
             insertSetting(statement, "theme", "dark", now);
             insertSetting(statement, "app.version", "1.0.0-SNAPSHOT", now);
+            insertSetting(statement, "general.default_repository_id", "", now);
+            insertSetting(statement, "general.auto_refresh", "false", now);
+            insertSetting(statement, "general.confirm_before_delete", "true", now);
+            insertSetting(statement, "general.default_branch", "main", now);
+            insertSetting(statement, "appearance.font_size", "13", now);
+            insertSetting(statement, "notifications.enabled", "true", now);
+            insertSetting(statement, "notifications.success", "true", now);
+            insertSetting(statement, "notifications.warning", "true", now);
+            insertSetting(statement, "notifications.error", "true", now);
+            insertSetting(statement, "app.author", "GitForge Team", now);
         }
     }
 

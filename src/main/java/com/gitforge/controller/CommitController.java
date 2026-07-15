@@ -131,7 +131,7 @@ public class CommitController {
         }
 
         Window owner = commitTable.getScene() == null ? null : commitTable.getScene().getWindow();
-        if (!UiDialogs.confirm(
+        if (!UiDialogs.confirmDelete(
                 owner,
                 "Delete Commit",
                 "Delete commit " + selected.getShortHash() + "?",

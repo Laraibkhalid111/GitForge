@@ -86,6 +86,7 @@ public class RepositoryService {
             branchRepository.create(branch);
 
             connection.commit();
+            AnalyticsService.invalidateSharedCache();
             return toSummary(repositoryRepository.findById(repositoryId).orElseThrow());
         } catch (SQLException | RuntimeException ex) {
             connection.rollback();
@@ -115,7 +116,11 @@ public class RepositoryService {
     }
 
     public boolean deleteRepository(long id) throws SQLException {
-        return repositoryRepository.delete(id);
+        boolean deleted = repositoryRepository.delete(id);
+        if (deleted) {
+            AnalyticsService.invalidateSharedCache();
+        }
+        return deleted;
     }
 
     public int countRepositories() throws SQLException {

@@ -1,29 +1,44 @@
 package com.gitforge.util;
 
+import com.gitforge.service.SettingsService;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.stage.Window;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Shared confirmation and error dialogs with dark-theme styling.
+ * Shared confirmation and error dialogs with theme-aware styling.
  */
 public final class UiDialogs {
+
+    private static final SettingsService SETTINGS = new SettingsService();
 
     private UiDialogs() {
     }
 
+    /**
+     * Always shows a confirmation dialog (merge, restore, and other non-delete actions).
+     */
     public static boolean confirm(Window owner, String title, String header, String content) {
         Alert alert = create(Alert.AlertType.CONFIRMATION, owner, title, header, content);
-        ButtonType delete = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
+        ButtonType accept = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(delete, cancel);
+        alert.getButtonTypes().setAll(accept, cancel);
         Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == delete;
+        return result.isPresent() && result.get() == accept;
+    }
+
+    /**
+     * Confirmation for destructive deletes. Honors the "Confirm before delete" preference.
+     */
+    public static boolean confirmDelete(Window owner, String title, String header, String content) {
+        if (!SETTINGS.isConfirmBeforeDeleteEnabled()) {
+            return true;
+        }
+        return confirm(owner, title, header, content);
     }
 
     public static void error(Window owner, String header, String detail) {
@@ -57,12 +72,7 @@ public final class UiDialogs {
     private static void style(Alert alert) {
         DialogPane pane = alert.getDialogPane();
         pane.getStyleClass().add("gitforge-dialog");
-        String stylesheet = Objects.requireNonNull(
-                UiDialogs.class.getResource("/css/dark-theme.css"),
-                "dark-theme.css not found"
-        ).toExternalForm();
-        if (!pane.getStylesheets().contains(stylesheet)) {
-            pane.getStylesheets().add(stylesheet);
-        }
+        String stylesheet = ThemeManager.currentDialogStylesheet();
+        pane.getStylesheets().setAll(stylesheet);
     }
 }

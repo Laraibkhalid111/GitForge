@@ -36,10 +36,12 @@ class AnalyticsServiceTest {
         branchService = new BranchService();
         commitService = new CommitService();
         analyticsService = new AnalyticsService();
+        AnalyticsService.invalidateSharedCache();
     }
 
     @AfterEach
     void tearDown() throws Exception {
+        AnalyticsService.invalidateSharedCache();
         databaseService.shutdown();
     }
 

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/24"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gitforge.controller.DashboardController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            styleClass="page-scroll">
+
+    <VBox spacing="18" styleClass="content-area home-dashboard">
+        <padding>
+            <Insets top="20" right="24" bottom="24" left="24"/>
+        </padding>
+
+        <!-- Welcome -->
+        <VBox spacing="6" styleClass="chart-card welcome-card">
+            <padding>
+                <Insets top="18" right="20" bottom="18" left="20"/>
+            </padding>
+            <HBox spacing="14" alignment="CENTER_LEFT">
+                <StackPane styleClass="brand-icon-wrap">
+                    <FontIcon iconLiteral="mdi2g-git" iconSize="28" styleClass="brand-icon"/>
+                </StackPane>
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label fx:id="welcomeTitleLabel" text="Welcome to GitForge" styleClass="placeholder-title"/>
+                    <Label fx:id="welcomeSubtitleLabel"
+                           text="Your operational home for simulated repositories, commits, and branches."
+                           styleClass="placeholder-body"
+                           wrapText="true"/>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <GridPane hgap="16" vgap="16" styleClass="stats-grid">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="55" minWidth="280"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="45" minWidth="260"/>
+            </columnConstraints>
+
+            <!-- Recent repositories -->
+            <VBox spacing="10" styleClass="repo-table-card" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                  GridPane.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <Label text="Recent Repositories" styleClass="section-title"/>
+                <ListView fx:id="recentRepositoriesList" styleClass="activity-list" prefHeight="180"
+                          VBox.vgrow="ALWAYS"/>
+                <Label fx:id="recentReposEmptyLabel" text="No repositories yet. Create one to get started."
+                       styleClass="repo-empty-label" wrapText="true" visible="false" managed="false"/>
+            </VBox>
+
+            <!-- Current repository status -->
+            <VBox spacing="10" styleClass="repo-details-card" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                  GridPane.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="mdi2i-information-outline" iconSize="18" styleClass="repo-details-icon"/>
+                    <Label text="Current Repository Status" styleClass="section-title"/>
+                </HBox>
+                <Label fx:id="statusPlaceholderLabel" text="Select or create a repository to see its status."
+                       styleClass="repo-details-placeholder" wrapText="true"/>
+                <GridPane fx:id="statusGrid" hgap="12" vgap="10" visible="false" managed="false">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="110" prefWidth="120"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+                    <Label text="Name" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <Label fx:id="statusNameLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Branch" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <Label fx:id="statusBranchLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Label text="Commits" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <Label fx:id="statusCommitsLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="Branches" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <Label fx:id="statusBranchesLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    <Label text="Status" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <Label fx:id="statusStateLabel" styleClass="detail-value detail-status"
+                           GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    <Label text="Updated" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                    <Label fx:id="statusUpdatedLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                </GridPane>
+            </VBox>
+
+            <!-- Quick actions -->
+            <VBox spacing="10" styleClass="chart-card" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                  GridPane.columnSpan="2">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <Label text="Quick Actions" styleClass="section-title"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button text="New Repository" styleClass="toolbar-button toolbar-button-primary"
+                            onAction="#onQuickNewRepository">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2p-plus" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Create a simulated repository"/>
+                        </tooltip>
+                    </Button>
+                    <Button text="Open Repositories" styleClass="toolbar-button" onAction="#onQuickOpenRepositories">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2s-source-repository" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                    </Button>
+                    <Button text="New Commit" styleClass="toolbar-button" onAction="#onQuickOpenCommits">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2s-source-commit" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Branches" styleClass="toolbar-button" onAction="#onQuickOpenBranches">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2s-source-branch" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Commit Graph" styleClass="toolbar-button" onAction="#onQuickOpenGraph">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2g-graph-outline" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Analytics" styleClass="toolbar-button" onAction="#onQuickOpenAnalytics">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2c-chart-bar" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+            </VBox>
+        </GridPane>
+
+        <GridPane hgap="16" vgap="16" styleClass="charts-grid" VBox.vgrow="ALWAYS">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="48" minWidth="260"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="52" minWidth="280"/>
+            </columnConstraints>
+
+            <!-- Recent activity -->
+            <VBox spacing="10" styleClass="repo-table-card" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                  GridPane.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <Label text="Recent Activity" styleClass="section-title"/>
+                <ListView fx:id="recentActivityList" styleClass="activity-list" prefHeight="220"
+                          VBox.vgrow="ALWAYS"/>
+                <Label fx:id="activityEmptyLabel" text="No recent activity yet."
+                       styleClass="repo-empty-label" wrapText="true" visible="false" managed="false"/>
+            </VBox>
+
+            <!-- Mini commit graph preview -->
+            <VBox spacing="10" styleClass="chart-card" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                  GridPane.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="14" right="14" bottom="14" left="14"/>
+                </padding>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Mini Commit Graph" styleClass="section-title" HBox.hgrow="ALWAYS"/>
+                    <Button text="Open Graph" styleClass="toolbar-button" onAction="#onQuickOpenGraph">
+                        <graphic>
+                            <FontIcon iconLiteral="mdi2g-graph-outline" iconSize="16" styleClass="toolbar-button-icon"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+                <Label fx:id="graphPreviewHintLabel" text="Preview of the active repository DAG"
+                       styleClass="chart-subtitle"/>
+                <StackPane styleClass="graph-scroll" VBox.vgrow="ALWAYS" minHeight="220" prefHeight="240">
+                    <Pane fx:id="miniGraphCanvas" styleClass="graph-canvas" minHeight="220" prefHeight="240"/>
+                    <Label fx:id="graphEmptyLabel" text="Select a repository with commits to preview the graph."
+                           styleClass="repo-empty-label" wrapText="true" maxWidth="280"
+                           alignment="CENTER"/>
+                </StackPane>
+            </VBox>
+        </GridPane>
+    </VBox>
+</ScrollPane>

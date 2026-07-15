@@ -1,8 +1,10 @@
 package com.gitforge;
 
 import com.gitforge.service.DatabaseService;
+import com.gitforge.service.SettingsService;
 import com.gitforge.util.AppInfo;
 import com.gitforge.util.SplashScreen;
+import com.gitforge.util.ThemeManager;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -61,12 +63,14 @@ public class GitForgeApp extends Application {
 
         Parent root = loader.load();
         Scene scene = new Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-        scene.getStylesheets().add(
-                Objects.requireNonNull(
-                        getClass().getResource("/css/dark-theme.css"),
-                        "dark-theme.css not found on classpath"
-                ).toExternalForm()
-        );
+        try {
+            SettingsService settingsService = new SettingsService();
+            settingsService.ensureDefaults();
+            var preferences = settingsService.loadPreferences();
+            ThemeManager.apply(scene, preferences.getTheme(), preferences.getFontSize());
+        } catch (Exception ex) {
+            ThemeManager.apply(scene, ThemeManager.THEME_DARK, 13);
+        }
 
         stage.setTitle(AppInfo.APP_NAME + " — " + AppInfo.APP_TAGLINE);
         stage.setMinWidth(MIN_WIDTH);

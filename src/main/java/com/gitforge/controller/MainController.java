@@ -1,7 +1,7 @@
 package com.gitforge.controller;
 
 import com.gitforge.util.AppInfo;
-import com.gitforge.util.UiDialogs;
+import com.gitforge.util.ThemeManager;
 import com.gitforge.util.UiNotifications;
 import io.github.palexdev.materialfx.controls.MFXProgressSpinner;
 import javafx.animation.FadeTransition;
@@ -27,11 +27,13 @@ public class MainController {
 
     private enum Page {
         DASHBOARD,
+        ANALYTICS,
         REPOSITORY,
         COMMITS,
         BRANCHES,
         MERGE,
         COMMIT_GRAPH,
+        SETTINGS,
         PLACEHOLDER
     }
 
@@ -59,7 +61,11 @@ public class MainController {
     @FXML
     private ScrollPane dashboardPage;
     @FXML
-    private AnalyticsController dashboardPageController;
+    private DashboardController dashboardPageController;
+    @FXML
+    private ScrollPane analyticsPage;
+    @FXML
+    private AnalyticsController analyticsPageController;
     @FXML
     private BorderPane repositoryPage;
     @FXML
@@ -80,6 +86,10 @@ public class MainController {
     private BorderPane commitGraphPage;
     @FXML
     private CommitGraphController commitGraphPageController;
+    @FXML
+    private ScrollPane settingsPage;
+    @FXML
+    private SettingsController settingsPageController;
     @FXML
     private VBox modulePlaceholderPage;
     @FXML
@@ -135,6 +145,17 @@ public class MainController {
     private void wireStatusReporters() {
         if (dashboardPageController != null) {
             dashboardPageController.setStatusReporter(this::reportStatus);
+            dashboardPageController.setQuickActions(
+                    this::onNewRepositoryClicked,
+                    this::showRepositoryPage,
+                    this::showCommitPage,
+                    this::showBranchPage,
+                    this::showCommitGraphPage,
+                    this::showAnalyticsPage
+            );
+        }
+        if (analyticsPageController != null) {
+            analyticsPageController.setStatusReporter(this::reportStatus);
         }
         if (repositoryPageController != null) {
             repositoryPageController.setStatusReporter(this::reportStatus);
@@ -144,12 +165,18 @@ public class MainController {
         }
         if (branchPageController != null) {
             branchPageController.setStatusReporter(this::reportStatus);
+            branchPageController.setMergeNavigator(this::showMergePage);
         }
         if (mergePageController != null) {
             mergePageController.setStatusReporter(this::reportStatus);
         }
         if (commitGraphPageController != null) {
             commitGraphPageController.setStatusReporter(this::reportStatus);
+        }
+        if (settingsPageController != null) {
+            settingsPageController.setStatusReporter(this::reportStatus);
+            settingsPageController.setThemeApplier(this::applyPreferences);
+            settingsPageController.setAboutOpener(this::openAboutDialog);
         }
     }
 
@@ -180,7 +207,7 @@ public class MainController {
         );
         scene.getAccelerators().put(
                 new KeyCodeCombination(KeyCode.DIGIT7, KeyCombination.CONTROL_DOWN),
-                this::onAnalyticsSelected
+                this::showAnalyticsPage
         );
         scene.getAccelerators().put(
                 new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN),
@@ -236,43 +263,18 @@ public class MainController {
 
     @FXML
     private void onAnalyticsSelected() {
-        showDashboard();
-        selectNav(navAnalytics);
-        updateChrome("Analytics", "Repository analytics dashboard");
-        statusPageLabel.setText("Analytics");
+        showAnalyticsPage();
     }
 
     @FXML
     private void onSettingsSelected() {
-        showModule(navSettings, "Settings", "mdi2c-cog-outline",
-                "Theme: Dark (system default)\n"
-                        + "Database: local SQLite (~/.gitforge)\n"
-                        + "Version: " + AppInfo.resolveVersion() + "\n\n"
-                        + "Keyboard shortcuts:\n"
-                        + "Ctrl+1–7  Switch pages\n"
-                        + "Ctrl+N    New repository\n"
-                        + "Ctrl+R / F5  Refresh\n"
-                        + "F1        About");
+        showSettingsPage();
     }
 
     @FXML
     private void onAboutSelected() {
-        showModule(navAbout, "About GitForge", "mdi2i-information-outline",
-                AppInfo.APP_NAME + " " + AppInfo.resolveVersion() + "\n"
-                        + AppInfo.APP_TAGLINE + "\n\n"
-                        + "A desktop Git visualizer with simulated repositories, commits,\n"
-                        + "branches, merges, interactive commit graphs, and analytics.\n\n"
-                        + AppInfo.COPYRIGHT + "\n"
-                        + "Built with JavaFX, MaterialFX, Ikonli, and SQLite.");
-        if (rootPane.getScene() != null) {
-            UiDialogs.info(
-                    rootPane.getScene().getWindow(),
-                    "About " + AppInfo.APP_NAME,
-                    AppInfo.displayVersion(),
-                    AppInfo.APP_TAGLINE + "\n\n" + AppInfo.COPYRIGHT
-                            + "\nJavaFX · MaterialFX · Ikonli · SQLite"
-            );
-        }
+        selectNav(navAbout);
+        openAboutDialog();
     }
 
     @FXML
@@ -281,6 +283,10 @@ public class MainController {
         try {
             if (currentPage == Page.DASHBOARD && dashboardPageController != null) {
                 dashboardPageController.onRefreshClicked();
+                return;
+            }
+            if (currentPage == Page.ANALYTICS && analyticsPageController != null) {
+                analyticsPageController.onRefreshClicked();
                 return;
             }
             if (currentPage == Page.REPOSITORY && repositoryPageController != null) {
@@ -308,6 +314,11 @@ public class MainController {
                 reportStatus("Commit graph refreshed");
                 return;
             }
+            if (currentPage == Page.SETTINGS && settingsPageController != null) {
+                settingsPageController.onPageShown();
+                reportStatus("Settings refreshed");
+                return;
+            }
             reportStatus("View refreshed");
         } finally {
             setLoadingVisible(false);
@@ -322,12 +333,36 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void onMinimizeClicked() {
+        if (rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof javafx.stage.Stage stage) {
+            stage.setIconified(true);
+        }
+    }
+
+    @FXML
+    private void onCloseClicked() {
+        if (rootPane.getScene() != null && rootPane.getScene().getWindow() instanceof javafx.stage.Stage stage) {
+            stage.close();
+        }
+    }
+
     private void showDashboard() {
         selectNav(navDashboard);
-        updateChrome("Dashboard", "Repository analytics overview");
+        updateChrome("Dashboard", "Operational home and quick actions");
         showPage(Page.DASHBOARD);
         if (dashboardPageController != null) {
             dashboardPageController.onPageShown();
+        }
+        reportStatus("Ready");
+    }
+
+    private void showAnalyticsPage() {
+        selectNav(navAnalytics);
+        updateChrome("Analytics", "Repository statistics and visualizations");
+        showPage(Page.ANALYTICS);
+        if (analyticsPageController != null) {
+            analyticsPageController.onPageShown();
         }
         reportStatus("Ready");
     }
@@ -382,6 +417,30 @@ public class MainController {
         reportStatus("Ready");
     }
 
+    private void showSettingsPage() {
+        selectNav(navSettings);
+        updateChrome("Settings", "Application preferences");
+        showPage(Page.SETTINGS);
+        if (settingsPageController != null) {
+            settingsPageController.onPageShown();
+        }
+        reportStatus("Ready");
+    }
+
+    private void openAboutDialog() {
+        if (rootPane.getScene() != null) {
+            AboutDialogController.show(rootPane.getScene().getWindow());
+        }
+    }
+
+    private void applyPreferences(com.gitforge.service.SettingsService.Preferences preferences) {
+        if (rootPane.getScene() == null || preferences == null) {
+            return;
+        }
+        ThemeManager.apply(rootPane.getScene(), preferences.getTheme(), preferences.getFontSize());
+        statusVersionLabel.setText(AppInfo.displayVersion());
+    }
+
     private void showModule(VBox navItem, String title, String iconLiteral, String body) {
         selectNav(navItem);
         updateChrome(title, "Application information");
@@ -402,11 +461,13 @@ public class MainController {
         currentPage = page;
         Node visible = resolvePageNode(page);
         setVisible(dashboardPage, page == Page.DASHBOARD);
+        setVisible(analyticsPage, page == Page.ANALYTICS);
         setVisible(repositoryPage, page == Page.REPOSITORY);
         setVisible(commitPage, page == Page.COMMITS);
         setVisible(branchPage, page == Page.BRANCHES);
         setVisible(mergePage, page == Page.MERGE);
         setVisible(commitGraphPage, page == Page.COMMIT_GRAPH);
+        setVisible(settingsPage, page == Page.SETTINGS);
         setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
         if (visible != null) {
             fadeInPage(visible);
@@ -416,11 +477,13 @@ public class MainController {
     private Node resolvePageNode(Page page) {
         return switch (page) {
             case DASHBOARD -> dashboardPage;
+            case ANALYTICS -> analyticsPage;
             case REPOSITORY -> repositoryPage;
             case COMMITS -> commitPage;
             case BRANCHES -> branchPage;
             case MERGE -> mergePage;
             case COMMIT_GRAPH -> commitGraphPage;
+            case SETTINGS -> settingsPage;
             case PLACEHOLDER -> modulePlaceholderPage;
         };
     }

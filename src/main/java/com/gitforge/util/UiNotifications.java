@@ -1,5 +1,6 @@
 package com.gitforge.util;
 
+import com.gitforge.service.SettingsService;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
@@ -10,10 +11,11 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
- * Lightweight success toast notifications overlaid on the main shell.
+ * Lightweight toast notifications overlaid on the main shell.
  */
 public final class UiNotifications {
 
+    private static final SettingsService SETTINGS = new SettingsService();
     private static StackPane host;
 
     private UiNotifications() {
@@ -24,10 +26,23 @@ public final class UiNotifications {
     }
 
     public static void success(String message) {
+        if (!SETTINGS.shouldShowSuccessNotifications()) {
+            return;
+        }
         show(message, "mdi2c-check-circle-outline", "toast-success");
     }
 
+    public static void warning(String message) {
+        if (!SETTINGS.shouldShowWarningNotifications()) {
+            return;
+        }
+        show(message, "mdi2a-alert-outline", "toast-info");
+    }
+
     public static void info(String message) {
+        if (!SETTINGS.shouldShowWarningNotifications() && !SETTINGS.shouldShowSuccessNotifications()) {
+            return;
+        }
         show(message, "mdi2i-information-outline", "toast-info");
     }
 

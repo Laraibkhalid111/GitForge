@@ -60,7 +60,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2v-view-dashboard-outline" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Dashboard" styleClass="nav-label"/>
-                            <Label text="Ctrl+1" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -71,7 +70,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2s-source-repository" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Repository" styleClass="nav-label"/>
-                            <Label text="Ctrl+2" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -82,7 +80,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2s-source-commit" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Commits" styleClass="nav-label"/>
-                            <Label text="Ctrl+3" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -93,7 +90,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2s-source-branch" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Branches" styleClass="nav-label"/>
-                            <Label text="Ctrl+4" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -104,7 +100,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2s-source-merge" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Merge" styleClass="nav-label"/>
-                            <Label text="Ctrl+5" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -115,7 +110,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2g-graph-outline" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Commit Graph" styleClass="nav-label"/>
-                            <Label text="Ctrl+6" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -126,7 +120,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2c-chart-bar" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Analytics" styleClass="nav-label"/>
-                            <Label text="Ctrl+7" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -137,7 +130,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2c-cog-outline" iconSize="18" styleClass="nav-icon"/>
                             <Label text="Settings" styleClass="nav-label"/>
-                            <Label text="Ctrl+," styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
 
@@ -148,7 +140,6 @@
                         <HBox spacing="12" alignment="CENTER_LEFT">
                             <FontIcon iconLiteral="mdi2i-information-outline" iconSize="18" styleClass="nav-icon"/>
                             <Label text="About" styleClass="nav-label"/>
-                            <Label text="F1" styleClass="nav-shortcut"/>
                         </HBox>
                     </VBox>
                 </VBox>
@@ -192,12 +183,36 @@
                                 <Tooltip text="Create a simulated repository (Ctrl+N)"/>
                             </tooltip>
                         </Button>
+
+                        <Separator orientation="VERTICAL" styleClass="status-separator" prefHeight="18"/>
+
+                        <Button styleClass="toolbar-button window-control-button" onAction="#onMinimizeClicked">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi2w-window-minimize" iconSize="16" styleClass="toolbar-button-icon"/>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Minimize"/>
+                            </tooltip>
+                        </Button>
+
+                        <Button styleClass="toolbar-button window-control-button window-close-button"
+                                onAction="#onCloseClicked">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi2c-close" iconSize="16" styleClass="toolbar-button-icon"/>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Close"/>
+                            </tooltip>
+                        </Button>
                     </HBox>
                 </top>
 
                 <center>
                     <StackPane styleClass="page-host">
-                        <fx:include fx:id="dashboardPage" source="analytics-dashboard-view.fxml"/>
+                        <fx:include fx:id="dashboardPage" source="dashboard-view.fxml"/>
+
+                        <fx:include fx:id="analyticsPage" source="analytics-dashboard-view.fxml"
+                                    visible="false" managed="false"/>
 
                         <fx:include fx:id="repositoryPage" source="repository-view.fxml"
                                     visible="false" managed="false"/>
@@ -212,6 +227,9 @@
                                     visible="false" managed="false"/>
 
                         <fx:include fx:id="commitGraphPage" source="commit-graph-view.fxml"
+                                    visible="false" managed="false"/>
+
+                        <fx:include fx:id="settingsPage" source="settings-view.fxml"
                                     visible="false" managed="false"/>
 
                         <VBox fx:id="modulePlaceholderPage" alignment="CENTER" spacing="14"

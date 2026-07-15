@@ -119,6 +119,7 @@ public class BranchService {
             connection.commit();
             Branch persisted = branchRepository.findById(branch.getId()).orElseThrow();
             insertBranchIntoTree(persisted);
+            AnalyticsService.invalidateSharedCache();
             return toSummary(persisted);
         } catch (SQLException | RuntimeException ex) {
             connection.rollback();
@@ -169,6 +170,7 @@ public class BranchService {
             connection.commit();
             if (deleted) {
                 deleteBranchFromTree(id);
+                AnalyticsService.invalidateSharedCache();
             }
             return deleted;
         } catch (SQLException | RuntimeException ex) {
@@ -198,6 +200,7 @@ public class BranchService {
             target.setStatus(Branch.STATUS_ACTIVE);
             branchRepository.update(target);
             connection.commit();
+            AnalyticsService.invalidateSharedCache();
             return toSummary(branchRepository.findById(branchId).orElseThrow());
         } catch (SQLException | RuntimeException ex) {
             connection.rollback();

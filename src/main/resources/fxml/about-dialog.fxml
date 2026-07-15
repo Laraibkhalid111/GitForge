@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx/24"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gitforge.controller.AboutDialogController"
+      spacing="14" styleClass="repo-dialog-root settings-card"
+      prefWidth="520">
+    <padding>
+        <Insets top="24" right="24" bottom="20" left="24"/>
+    </padding>
+
+    <HBox spacing="14" alignment="CENTER_LEFT">
+        <StackPane styleClass="brand-icon-wrap">
+            <FontIcon iconLiteral="mdi2g-git" iconSize="28" styleClass="brand-icon"/>
+        </StackPane>
+        <VBox spacing="4">
+            <Label text="GitForge" styleClass="dialog-title"/>
+            <Label fx:id="versionLabel" text="GitForge" styleClass="chart-subtitle"/>
+            <Label fx:id="javaLabel" text="Java" styleClass="settings-hint"/>
+        </VBox>
+    </HBox>
+
+    <Separator/>
+
+    <Label text="Project Description" styleClass="chart-title"/>
+    <Label wrapText="true" styleClass="placeholder-body"
+           text="GitForge is a desktop Git visualizer with simulated repositories, commits, branches, merges, interactive commit graphs, and analytics — without using the Git CLI."/>
+
+    <Label text="Technology Stack" styleClass="chart-title"/>
+    <Label wrapText="true" styleClass="placeholder-body"
+           text="Java · JavaFX · SQLite · FXML · MaterialFX · Ikonli"/>
+
+    <Label text="DSA Concepts" styleClass="chart-title"/>
+    <Label wrapText="true" styleClass="placeholder-body"
+           text="Linked List (commit history) · Tree (branch hierarchy) · DAG (commit graph) · HashMap (analytics cache)"/>
+
+    <Label text="Developer Information" styleClass="chart-title"/>
+    <Label wrapText="true" styleClass="placeholder-body"
+           text="Built for education and demonstration of MVC architecture, SQLite persistence, and interactive JavaFX visualization."/>
+
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Close" styleClass="toolbar-button toolbar-button-primary" onAction="#onCloseClicked"/>
+    </HBox>
+</VBox>

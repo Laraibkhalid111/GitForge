@@ -41,7 +41,7 @@ public class AnalyticsService {
     private final BranchRepository branchRepository;
     private final CommitRepository commitRepository;
     private final MergeRepository mergeRepository;
-    private final AnalyticsCache<String, AnalyticsSnapshot> cache = new AnalyticsCache<>();
+    private static final AnalyticsCache<String, AnalyticsSnapshot> SHARED_CACHE = new AnalyticsCache<>();
 
     public AnalyticsService() {
         this(new RepositoryRepository(), new BranchRepository(), new CommitRepository(), new MergeRepository());
@@ -58,11 +58,18 @@ public class AnalyticsService {
     }
 
     public AnalyticsCache<String, AnalyticsSnapshot> getCache() {
-        return cache;
+        return SHARED_CACHE;
     }
 
     public void invalidateCache() {
-        cache.clear();
+        SHARED_CACHE.clear();
+    }
+
+    /**
+     * Clears analytics snapshots shared across all {@link AnalyticsService} instances.
+     */
+    public static void invalidateSharedCache() {
+        SHARED_CACHE.clear();
     }
 
     /**
@@ -72,13 +79,13 @@ public class AnalyticsService {
         Filter safe = filter == null ? new Filter() : filter;
         String key = safe.cacheKey();
         if (!forceRefresh) {
-            var cached = cache.get(key);
+            var cached = SHARED_CACHE.get(key);
             if (cached.isPresent()) {
                 return cached.get().withCacheFlag(true);
             }
         }
         AnalyticsSnapshot snapshot = buildSnapshot(safe).withCacheFlag(false);
-        cache.put(key, snapshot);
+        SHARED_CACHE.put(key, snapshot);
         return snapshot;
     }
 

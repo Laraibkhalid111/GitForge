@@ -114,6 +114,11 @@ public class Branch {
 
     public void setStatus(String status) {
         this.status = status;
+        if (STATUS_ACTIVE.equalsIgnoreCase(status)) {
+            this.active = true;
+        } else if (STATUS_INACTIVE.equalsIgnoreCase(status)) {
+            this.active = false;
+        }
     }
 
     @Override

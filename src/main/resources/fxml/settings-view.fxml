@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.palexdev.materialfx.controls.MFXButton?>
+<?import io.github.palexdev.materialfx.controls.MFXToggleButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/24"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gitforge.controller.SettingsController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            styleClass="page-scroll">
+
+    <fx:define>
+        <ToggleGroup fx:id="themeToggleGroup"/>
+    </fx:define>
+
+    <VBox spacing="16" styleClass="content-area">
+        <padding>
+            <Insets top="20" right="24" bottom="24" left="24"/>
+        </padding>
+
+        <Label text="Settings &amp; Preferences" styleClass="section-title"/>
+        <Label text="Manage GitForge preferences. Changes apply immediately and are stored in SQLite."
+               styleClass="settings-hint" wrapText="true"/>
+
+        <TabPane fx:id="settingsTabs" styleClass="settings-tab-pane" tabClosingPolicy="UNAVAILABLE"
+                 VBox.vgrow="ALWAYS">
+
+            <Tab text="General">
+                <VBox spacing="12" styleClass="settings-card">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Label text="General" styleClass="chart-title"/>
+                    <GridPane hgap="14" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="180" prefWidth="200"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="Default Repository" styleClass="detail-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <ComboBox fx:id="defaultRepositoryCombo" promptText="None"
+                                  styleClass="dialog-field" prefWidth="280"
+                                  GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Default Branch" styleClass="detail-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="defaultBranchField" promptText="main"
+                                   styleClass="dialog-field" prefWidth="280"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Auto Refresh" styleClass="detail-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <MFXToggleButton fx:id="autoRefreshToggle" text="Enable automatic refresh"
+                                         GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label text="Confirm Before Delete" styleClass="detail-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <MFXToggleButton fx:id="confirmDeleteToggle" text="Ask before deleting records"
+                                         GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </GridPane>
+                </VBox>
+            </Tab>
+
+            <Tab text="Appearance">
+                <VBox spacing="12" styleClass="settings-card">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Label text="Appearance" styleClass="chart-title"/>
+                    <Label text="Theme" styleClass="detail-label"/>
+                    <HBox spacing="16">
+                        <RadioButton fx:id="themeDarkRadio" text="Dark Theme" toggleGroup="$themeToggleGroup"
+                                     styleClass="merge-strategy-radio"/>
+                        <RadioButton fx:id="themeLightRadio" text="Light Theme" toggleGroup="$themeToggleGroup"
+                                     styleClass="merge-strategy-radio"/>
+                        <RadioButton fx:id="themeSystemRadio" text="System Theme" toggleGroup="$themeToggleGroup"
+                                     styleClass="merge-strategy-radio"/>
+                    </HBox>
+                    <Label text="Font Size" styleClass="detail-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Slider fx:id="fontSizeSlider" min="11" max="20" value="13" majorTickUnit="1"
+                                minorTickCount="0" snapToTicks="true" showTickMarks="true" showTickLabels="true"
+                                prefWidth="280"/>
+                        <Label fx:id="fontSizeValueLabel" text="13 px" styleClass="detail-value"/>
+                    </HBox>
+                    <Label text="Theme and font size apply immediately." styleClass="settings-hint"/>
+                </VBox>
+            </Tab>
+
+            <Tab text="Notifications">
+                <VBox spacing="12" styleClass="settings-card">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Label text="Notifications" styleClass="chart-title"/>
+                    <MFXToggleButton fx:id="notificationsEnabledToggle" text="Enable notifications"/>
+                    <MFXToggleButton fx:id="notifySuccessToggle" text="Success notifications"/>
+                    <MFXToggleButton fx:id="notifyWarningToggle" text="Warning notifications"/>
+                    <MFXToggleButton fx:id="notifyErrorToggle" text="Error notifications"/>
+                </VBox>
+            </Tab>
+
+            <Tab text="Database">
+                <VBox spacing="12" styleClass="settings-card">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Label text="Database" styleClass="chart-title"/>
+                    <GridPane hgap="14" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="160" prefWidth="180"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="Status" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="dbStatusLabel" styleClass="detail-value detail-status"
+                               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Location" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="dbLocationLabel" wrapText="true" styleClass="detail-value"
+                               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="Repositories" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="dbRepoCountLabel" styleClass="detail-value"
+                               GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label text="Database Size" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <Label fx:id="dbSizeLabel" styleClass="detail-value"
+                               GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </GridPane>
+                    <HBox spacing="10">
+                        <MFXButton text="Refresh Database Information" onAction="#onRefreshDatabaseInfo"
+                                   styleClass="toolbar-button"/>
+                        <MFXButton text="Backup Database" onAction="#onBackupDatabase"
+                                   styleClass="toolbar-button toolbar-button-primary"/>
+                        <MFXButton text="Restore Database" onAction="#onRestoreDatabase"
+                                   styleClass="toolbar-button"/>
+                    </HBox>
+                    <Label text="Restore replaces the current SQLite file. Restart GitForge after restore."
+                           styleClass="settings-hint" wrapText="true"/>
+                </VBox>
+            </Tab>
+
+            <Tab text="Application">
+                <VBox spacing="12" styleClass="settings-card">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Label text="Application" styleClass="chart-title"/>
+                    <GridPane hgap="14" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="160" prefWidth="180"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <Label text="Application Name" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="appNameLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Version" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="appVersionLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="Author" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="appAuthorLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label text="Java Version" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <Label fx:id="javaVersionLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label text="SQLite Driver" styleClass="detail-label" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <Label fx:id="sqliteVersionLabel" styleClass="detail-value" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    </GridPane>
+                    <HBox spacing="10">
+                        <MFXButton text="About GitForge" onAction="#onOpenAbout"
+                                   styleClass="toolbar-button toolbar-button-primary"/>
+                        <MFXButton text="Save Preferences" onAction="#onSaveClicked"
+                                   styleClass="toolbar-button"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </VBox>
+</ScrollPane>
