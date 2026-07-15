@@ -1,5 +1,6 @@
 package com.gitforge.controller;
 
+import com.gitforge.service.RepositoryService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,19 +10,26 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Controller for the GitForge application shell and Dashboard page.
- * Navigation and placeholder presentation only — no Git or database logic.
+ * Controller for the GitForge application shell, Dashboard, and page navigation.
  */
 public class MainController {
+
+    private enum Page {
+        DASHBOARD,
+        REPOSITORY,
+        PLACEHOLDER
+    }
 
     private static final String NAV_SELECTED = "nav-item-selected";
     private static final double STATS_TWO_COLUMN_BREAKPOINT = 980;
@@ -39,6 +47,10 @@ public class MainController {
 
     @FXML
     private ScrollPane dashboardPage;
+    @FXML
+    private BorderPane repositoryPage;
+    @FXML
+    private RepositoryController repositoryPageController;
     @FXML
     private VBox modulePlaceholderPage;
     @FXML
@@ -98,11 +110,14 @@ public class MainController {
     @FXML
     private VBox navAbout;
 
+    private final RepositoryService repositoryService = new RepositoryService();
+
     private List<VBox> navItems;
     private List<Node> statCards;
     private List<Node> chartCards;
     private int currentStatsColumns = -1;
     private int currentChartColumns = -1;
+    private Page currentPage = Page.DASHBOARD;
 
     @FXML
     private void initialize() {
@@ -113,7 +128,12 @@ public class MainController {
         statCards = List.of(statCardRepository, statCardCommits, statCardBranch, statCardMerge);
         chartCards = List.of(chartCardCommits, chartCardBranches);
 
+        if (repositoryPageController != null) {
+            repositoryPageController.setStatusReporter(message -> statusMessageLabel.setText(message));
+        }
+
         populatePlaceholderCharts();
+        refreshDashboardStats();
         bindResponsiveLayout();
         showDashboard();
     }
@@ -125,8 +145,7 @@ public class MainController {
 
     @FXML
     private void onRepositorySelected() {
-        showModule(navRepository, "Repository", "mdi2s-source-repository",
-                "Manage simulated repositories from this workspace.");
+        showRepositoryPage();
     }
 
     @FXML
@@ -173,18 +192,42 @@ public class MainController {
 
     @FXML
     private void onRefreshClicked() {
-        statusMessageLabel.setText("Dashboard refreshed");
+        if (currentPage == Page.REPOSITORY && repositoryPageController != null) {
+            repositoryPageController.onPageShown();
+            statusMessageLabel.setText("Repository list refreshed");
+            return;
+        }
+        if (currentPage == Page.DASHBOARD) {
+            refreshDashboardStats();
+            statusMessageLabel.setText("Dashboard refreshed");
+            return;
+        }
+        statusMessageLabel.setText("View refreshed");
     }
 
     @FXML
     private void onNewRepositoryClicked() {
-        statusMessageLabel.setText("Repository creation opens in a later module");
+        showRepositoryPage();
+        if (repositoryPageController != null) {
+            repositoryPageController.openCreateDialog();
+        }
     }
 
     private void showDashboard() {
         selectNav(navDashboard);
         updateChrome("Dashboard", "Simulated repository overview");
-        setPageVisible(true);
+        showPage(Page.DASHBOARD);
+        refreshDashboardStats();
+        statusMessageLabel.setText("Ready");
+    }
+
+    private void showRepositoryPage() {
+        selectNav(navRepository);
+        updateChrome("Repository", "Manage simulated repositories");
+        showPage(Page.REPOSITORY);
+        if (repositoryPageController != null) {
+            repositoryPageController.onPageShown();
+        }
         statusMessageLabel.setText("Ready");
     }
 
@@ -194,7 +237,7 @@ public class MainController {
         placeholderTitleLabel.setText(title);
         placeholderBodyLabel.setText(body);
         placeholderIcon.setIconLiteral(iconLiteral);
-        setPageVisible(false);
+        showPage(Page.PLACEHOLDER);
         statusMessageLabel.setText("Ready");
     }
 
@@ -204,11 +247,19 @@ public class MainController {
         statusPageLabel.setText(title);
     }
 
-    private void setPageVisible(boolean dashboard) {
-        dashboardPage.setVisible(dashboard);
-        dashboardPage.setManaged(dashboard);
-        modulePlaceholderPage.setVisible(!dashboard);
-        modulePlaceholderPage.setManaged(!dashboard);
+    private void showPage(Page page) {
+        currentPage = page;
+        setVisible(dashboardPage, page == Page.DASHBOARD);
+        setVisible(repositoryPage, page == Page.REPOSITORY);
+        setVisible(modulePlaceholderPage, page == Page.PLACEHOLDER);
+    }
+
+    private static void setVisible(Node node, boolean visible) {
+        if (node == null) {
+            return;
+        }
+        node.setVisible(visible);
+        node.setManaged(visible);
     }
 
     private void selectNav(VBox selected) {
@@ -297,11 +348,21 @@ public class MainController {
         ObservableList<XYChart.Series<String, Number>> branchChartData = FXCollections.observableArrayList();
         branchChartData.add(branchSeries);
         branchActivityChart.setData(branchChartData);
+    }
 
-        cardRepositoryValue.setText("—");
-        cardCommitsValue.setText("0");
-        cardBranchValue.setText("—");
-        cardMergeValue.setText("0");
+    private void refreshDashboardStats() {
+        try {
+            int repositoryCount = repositoryService.countRepositories();
+            int commitCount = repositoryService.countAllCommits();
+            cardRepositoryValue.setText(Integer.toString(repositoryCount));
+            cardCommitsValue.setText(Integer.toString(commitCount));
+            cardBranchValue.setText(repositoryCount > 0 ? "main" : "—");
+            cardMergeValue.setText("0");
+        } catch (SQLException ex) {
+            cardRepositoryValue.setText("—");
+            cardCommitsValue.setText("0");
+            cardBranchValue.setText("—");
+            cardMergeValue.setText("0");
+        }
     }
 }
-

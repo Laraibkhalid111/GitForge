@@ -46,4 +46,16 @@ public class RepositoryRepository {
     public List<Repository> search(String query) throws SQLException {
         return dao.search(query);
     }
+
+    public Optional<Repository> findByNameIgnoreCase(String name) throws SQLException {
+        return dao.findByNameIgnoreCase(name);
+    }
+
+    public boolean existsByNameIgnoreCase(String name, Long excludeId) throws SQLException {
+        return dao.existsByNameIgnoreCase(name, excludeId);
+    }
+
+    public int countAll() throws SQLException {
+        return dao.countAll();
+    }
 }

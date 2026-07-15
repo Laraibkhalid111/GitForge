@@ -45,4 +45,12 @@ public class CommitRepository {
     public List<Commit> search(String query) throws SQLException {
         return dao.search(query);
     }
+
+    public int countByRepositoryId(long repositoryId) throws SQLException {
+        return dao.countByRepositoryId(repositoryId);
+    }
+
+    public int countAll() throws SQLException {
+        return dao.countAll();
+    }
 }

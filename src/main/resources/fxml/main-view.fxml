@@ -179,7 +179,7 @@
                         </graphic>
                         <text>New</text>
                         <tooltip>
-                            <Tooltip text="Create repository (coming in a later module)"/>
+                            <Tooltip text="Create a simulated repository"/>
                         </tooltip>
                     </Button>
                 </HBox>
@@ -350,6 +350,9 @@
                             </GridPane>
                         </VBox>
                     </ScrollPane>
+
+                    <fx:include fx:id="repositoryPage" source="repository-view.fxml"
+                                visible="false" managed="false"/>
 
                     <VBox fx:id="modulePlaceholderPage" alignment="CENTER" spacing="14"
                           styleClass="content-area module-placeholder" managed="false" visible="false">

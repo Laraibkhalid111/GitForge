@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx/24"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gitforge.controller.RepositoryDialogController"
+      spacing="16"
+      styleClass="repo-dialog-root"
+      prefWidth="460">
+
+    <padding>
+        <Insets top="20" right="22" bottom="18" left="22"/>
+    </padding>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <FontIcon fx:id="dialogIcon" iconLiteral="mdi2s-source-repository" iconSize="22"
+                  styleClass="repo-details-icon"/>
+        <Label fx:id="dialogTitleLabel" text="New Repository" styleClass="dialog-title"/>
+    </HBox>
+
+    <Label fx:id="validationLabel" text="" styleClass="dialog-validation" wrapText="true"
+           managed="false" visible="false"/>
+
+    <GridPane hgap="12" vgap="12">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" prefWidth="130"/>
+            <ColumnConstraints hgrow="ALWAYS" minWidth="220"/>
+        </columnConstraints>
+
+        <Label text="Repository Name *" styleClass="dialog-field-label"
+               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="nameField" promptText="my-project" styleClass="dialog-field"
+                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Description" styleClass="dialog-field-label"
+               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextArea fx:id="descriptionArea" promptText="Optional description"
+                  styleClass="dialog-field dialog-textarea"
+                  prefRowCount="3" wrapText="true"
+                  GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Repository Path" styleClass="dialog-field-label"
+               GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="pathField" promptText="Simulated path (optional)"
+                   styleClass="dialog-field"
+                   GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label fx:id="defaultBranchLabel" text="Default Branch" styleClass="dialog-field-label"
+               GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="defaultBranchField" text="main" promptText="main"
+                   styleClass="dialog-field"
+                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancel" styleClass="toolbar-button" onAction="#onCancel"/>
+        <Button fx:id="saveButton" text="Create" styleClass="toolbar-button toolbar-button-primary"
+                onAction="#onSave" defaultButton="true"/>
+    </HBox>
+</VBox>

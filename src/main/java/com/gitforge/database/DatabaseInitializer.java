@@ -127,6 +127,7 @@ public final class DatabaseInitializer {
     }
 
     private static void createIndexes(Statement statement) throws SQLException {
+        statement.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_repositories_name ON repositories(name COLLATE NOCASE)");
         statement.execute("CREATE INDEX IF NOT EXISTS idx_branches_repository_id ON branches(repository_id)");
         statement.execute("CREATE INDEX IF NOT EXISTS idx_commits_repository_id ON commits(repository_id)");
         statement.execute("CREATE INDEX IF NOT EXISTS idx_commits_branch_id ON commits(branch_id)");

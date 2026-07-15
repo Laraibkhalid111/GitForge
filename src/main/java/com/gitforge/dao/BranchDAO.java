@@ -47,6 +47,26 @@ public class BranchDAO extends AbstractDAO {
             ORDER BY name COLLATE NOCASE
             """;
 
+    private static final String SELECT_BY_REPOSITORY = """
+            SELECT id, repository_id, name, is_active, created_at
+            FROM branches
+            WHERE repository_id = ?
+            ORDER BY name COLLATE NOCASE
+            """;
+
+    private static final String SELECT_ACTIVE_BY_REPOSITORY = """
+            SELECT id, repository_id, name, is_active, created_at
+            FROM branches
+            WHERE repository_id = ? AND is_active = 1
+            LIMIT 1
+            """;
+
+    private static final String COUNT_BY_REPOSITORY = """
+            SELECT COUNT(*)
+            FROM branches
+            WHERE repository_id = ?
+            """;
+
     public long create(Branch branch) throws SQLException {
         if (branch.getCreatedAt() == null) {
             branch.setCreatedAt(Instant.now());
@@ -99,6 +119,29 @@ public class BranchDAO extends AbstractDAO {
         try (PreparedStatement statement = connection().prepareStatement(SEARCH)) {
             statement.setString(1, likePattern(query));
             return queryList(statement, this::mapRow);
+        }
+    }
+
+    public List<Branch> findByRepositoryId(long repositoryId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(SELECT_BY_REPOSITORY)) {
+            statement.setLong(1, repositoryId);
+            return queryList(statement, this::mapRow);
+        }
+    }
+
+    public Optional<Branch> findActiveByRepositoryId(long repositoryId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(SELECT_ACTIVE_BY_REPOSITORY)) {
+            statement.setLong(1, repositoryId);
+            return queryOne(statement, this::mapRow);
+        }
+    }
+
+    public int countByRepositoryId(long repositoryId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_REPOSITORY)) {
+            statement.setLong(1, repositoryId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt(1) : 0;
+            }
         }
     }
 

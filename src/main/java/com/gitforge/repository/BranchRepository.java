@@ -45,4 +45,16 @@ public class BranchRepository {
     public List<Branch> search(String query) throws SQLException {
         return dao.search(query);
     }
+
+    public List<Branch> findByRepositoryId(long repositoryId) throws SQLException {
+        return dao.findByRepositoryId(repositoryId);
+    }
+
+    public Optional<Branch> findActiveByRepositoryId(long repositoryId) throws SQLException {
+        return dao.findActiveByRepositoryId(repositoryId);
+    }
+
+    public int countByRepositoryId(long repositoryId) throws SQLException {
+        return dao.countByRepositoryId(repositoryId);
+    }
 }

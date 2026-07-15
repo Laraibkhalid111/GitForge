@@ -51,6 +51,14 @@ public class CommitDAO extends AbstractDAO {
             ORDER BY committed_at DESC
             """;
 
+    private static final String COUNT_BY_REPOSITORY = """
+            SELECT COUNT(*)
+            FROM commits
+            WHERE repository_id = ?
+            """;
+
+    private static final String COUNT_ALL = "SELECT COUNT(*) FROM commits";
+
     public long create(Commit commit) throws SQLException {
         if (commit.getCommittedAt() == null) {
             commit.setCommittedAt(Instant.now());
@@ -101,6 +109,22 @@ public class CommitDAO extends AbstractDAO {
             statement.setString(2, pattern);
             statement.setString(3, pattern);
             return queryList(statement, this::mapRow);
+        }
+    }
+
+    public int countByRepositoryId(long repositoryId) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_REPOSITORY)) {
+            statement.setLong(1, repositoryId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt(1) : 0;
+            }
+        }
+    }
+
+    public int countAll() throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_ALL);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getInt(1) : 0;
         }
     }
 

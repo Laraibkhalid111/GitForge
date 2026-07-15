@@ -50,6 +50,25 @@ public class RepositoryDAO extends AbstractDAO {
             ORDER BY name COLLATE NOCASE
             """;
 
+    private static final String SELECT_BY_NAME = """
+            SELECT id, name, path, description, created_at, updated_at
+            FROM repositories
+            WHERE name = ? COLLATE NOCASE
+            """;
+
+    private static final String COUNT_BY_NAME = """
+            SELECT COUNT(*)
+            FROM repositories
+            WHERE name = ? COLLATE NOCASE
+            """;
+
+    private static final String COUNT_BY_NAME_EXCLUDING = """
+            SELECT COUNT(*)
+            FROM repositories
+            WHERE name = ? COLLATE NOCASE
+              AND id <> ?
+            """;
+
     public long create(Repository repository) throws SQLException {
         Instant now = Instant.now();
         if (repository.getCreatedAt() == null) {
@@ -121,6 +140,38 @@ public class RepositoryDAO extends AbstractDAO {
             statement.setString(2, pattern);
             statement.setString(3, pattern);
             return queryList(statement, this::mapRow);
+        }
+    }
+
+    public Optional<Repository> findByNameIgnoreCase(String name) throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement(SELECT_BY_NAME)) {
+            statement.setString(1, name);
+            return queryOne(statement, this::mapRow);
+        }
+    }
+
+    public boolean existsByNameIgnoreCase(String name, Long excludeId) throws SQLException {
+        if (excludeId == null) {
+            try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_NAME)) {
+                statement.setString(1, name);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    return resultSet.next() && resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        try (PreparedStatement statement = connection().prepareStatement(COUNT_BY_NAME_EXCLUDING)) {
+            statement.setString(1, name);
+            statement.setLong(2, excludeId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() && resultSet.getInt(1) > 0;
+            }
+        }
+    }
+
+    public int countAll() throws SQLException {
+        try (PreparedStatement statement = connection().prepareStatement("SELECT COUNT(*) FROM repositories");
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getInt(1) : 0;
         }
     }
 
